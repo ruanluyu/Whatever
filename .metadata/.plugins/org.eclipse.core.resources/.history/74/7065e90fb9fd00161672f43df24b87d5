@@ -1,0 +1,64 @@
+package system;
+
+import java.util.ArrayList;
+
+import object.Character;
+import object.NewtonObject;
+import processing.core.PApplet;
+
+public class GameManager {
+	public PApplet parent;
+	public ResManager res;
+	public Map map;
+	public Camera cam;
+	public AKeyPress akp;
+	public Character man;
+	public GameSystem system;
+	/**
+	 * 需要手动在renderFClist和updateList中注册
+	 */
+	public ArrayList<NewtonObject> nobjlist = new ArrayList<NewtonObject>();
+	//list
+	public ArrayList<Renderable> renderlist = new ArrayList<Renderable>();
+	public void loadRenderList(){
+		renderlist.clear();
+		//sign renderable objects up here
+		
+		//end
+		GameSystem.moveNullObject(renderlist);
+	}
+	public ArrayList<RenderableFromCamera> renderFClist = new ArrayList<RenderableFromCamera>();
+	public void loadRenderFCList(){
+		renderFClist.clear();
+		//sign renderable from camera objects up here
+		
+		renderFClist.add(map);
+		renderFClist.add(man);
+		//end
+		GameSystem.moveNullObject(renderFClist);
+	}
+	public ArrayList<NeedUpdate> updatelist = new ArrayList<NeedUpdate>();
+	public void loadNeedUpdateList(){
+		updatelist.clear();
+		//sign renderable from camera objects up here
+		updatelist.add(akp);
+		updatelist.add(man);
+		updatelist.add(cam);
+		updatelist.add(map);
+		//end
+		GameSystem.moveNullObject(updatelist);
+	}
+	//global properties
+	public int level = 1;
+	public int life = 3;
+	public boolean die = false;
+	public boolean controlable = false;
+	public Mode gameMode = Mode.OP;
+	public enum Mode{
+		OP,LOAD,RUN,PAUSE,DIE
+	}
+	/**
+	 * 0-start;1-load;2-exit
+	 */
+	public int selection = 0;
+}

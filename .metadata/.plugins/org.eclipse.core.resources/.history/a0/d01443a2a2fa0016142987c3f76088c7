@@ -1,0 +1,9 @@
+package Blocks;
+/**
+ * 检测到方块底部被小人顶撞
+ * @author ZzStarSound
+ *
+ */
+public interface BottomKnockable {
+	public void bottomKnocked();
+}

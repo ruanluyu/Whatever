@@ -1,0 +1,6 @@
+package Blocks;
+
+//可以穿透的。例如空气，或者用于设计一些其他的特殊方块。
+public interface Penetrable {
+	public void penetrate();
+}

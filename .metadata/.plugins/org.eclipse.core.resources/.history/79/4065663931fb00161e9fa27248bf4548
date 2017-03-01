@@ -1,0 +1,8 @@
+package Weapon;
+
+import java.util.ArrayList;
+
+public class Particle_System {
+	ArrayList<Particle> plist = new ArrayList<Particle>();
+	
+}

@@ -1,0 +1,9 @@
+package Blocks;
+/**
+ * 这个方块的底部设置成可以被小人碰撞的
+ * @author ZzStarSound
+ *
+ */
+public interface BottomKnockable {
+	public void bottomKnocked();
+}

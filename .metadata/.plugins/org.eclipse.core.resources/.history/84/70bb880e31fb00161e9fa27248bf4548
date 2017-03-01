@@ -1,0 +1,6 @@
+package Weapon;
+
+public class Particle_System {
+	ArrayList<Particle> plist = new ArrayList<Particle>();
+	
+}

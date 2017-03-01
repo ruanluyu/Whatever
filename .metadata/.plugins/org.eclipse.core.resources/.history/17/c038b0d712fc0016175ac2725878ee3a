@@ -1,0 +1,15 @@
+package blocks;
+
+public class Block_Thorn extends Block{
+
+	public Block_Thorn() {
+		super(Block.BlockId.THORN);
+		dieBlock = true;
+	}
+	
+	public Block_Thorn(int r90){
+		this();
+		rotate90 = r90;
+	}
+	
+}

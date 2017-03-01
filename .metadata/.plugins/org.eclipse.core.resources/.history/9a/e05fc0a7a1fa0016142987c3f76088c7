@@ -1,0 +1,6 @@
+package Blocks;
+
+//
+public interface Penetrable {
+	public void penetrate();
+}

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="ddf.minim.Minim"/>
+<fullyQualifiedTypeName name="ddf.minim.AudioPlayer"/>
+<fullyQualifiedTypeName name="java.awt.Image"/>
+<fullyQualifiedTypeName name="system.ResManager"/>
+<fullyQualifiedTypeName name="system.ResManager.imgMaterialId"/>
+<fullyQualifiedTypeName name="system.ResManager.ImgIdMessage"/>
+<fullyQualifiedTypeName name="system.ImgIdMessage"/>
+<fullyQualifiedTypeName name="Blocks.Block.BlockId"/>
+<fullyQualifiedTypeName name="Weapon.Weapon.WeaponProperties"/>
+<fullyQualifiedTypeName name="java.awt.Rectangle"/>
+<fullyQualifiedTypeName name="blocks.Penetrable"/>
+<fullyQualifiedTypeName name="processing.core.PVector"/>
+<fullyQualifiedTypeName name="processing.core.PFont"/>
+<fullyQualifiedTypeName name="java.awt.Font"/>
+<fullyQualifiedTypeName name="system.GameManager"/>
+<fullyQualifiedTypeName name="object.Character"/>
+<fullyQualifiedTypeName name="blocks.Block.BlockId"/>
+<fullyQualifiedTypeName name="system.Rectangle"/>
+<fullyQualifiedTypeName name="object.NewtonObject"/>
+<fullyQualifiedTypeName name="system.Renderable"/>
+<fullyQualifiedTypeName name="system.NeedUpdate"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="processing.core.PApplet"/>
+<fullyQualifiedTypeName name="blocks.BottomKnockable"/>
+<fullyQualifiedTypeName name="blocks.FallFeedBack"/>
+<fullyQualifiedTypeName name="blocks.Block"/>
+<fullyQualifiedTypeName name="blocks.StandFeedBack"/>
+<fullyQualifiedTypeName name="blocks.WalkFeedBack"/>
+<fullyQualifiedTypeName name="blocks.TouchFeedBack"/>
+<fullyQualifiedTypeName name="system.RenderableFromCamera"/>
+<fullyQualifiedTypeName name="system.Map"/>
+<fullyQualifiedTypeName name="system.GameSystem.Mode"/>
+<fullyQualifiedTypeName name="system.GameManager.Mode"/>
+<fullyQualifiedTypeName name="blocks.Block_Air"/>
+<fullyQualifiedTypeName name="processing.core.PGraphics"/>
+<fullyQualifiedTypeName name="processing.awt.PGraphicsJava2D"/>
+<fullyQualifiedTypeName name="processing.core.PImage"/>
+</qualifiedTypeNameHistroy>

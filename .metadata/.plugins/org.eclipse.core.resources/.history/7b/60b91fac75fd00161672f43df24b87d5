@@ -1,0 +1,62 @@
+package blocks;
+
+import processing.core.PImage;
+import system.GameManager;
+import system.ImgIdMessage;
+import system.Rectangle;
+import system.RenderableFromCamera;
+import system.ResManager;
+
+public abstract class Block implements RenderableFromCamera{
+	public BlockId id = BlockId.ERROR;
+	Rectangle area = null;
+	public int rotate90 = 0;
+	protected static PImage[] imgList = null;
+	public static GameManager gm = null;
+
+	public enum BlockId {
+		ERROR, AIR, BLOCK_NORMAL, BLOCK_SUSPENDED, THORN,THORN_T
+	}
+
+	public Block(BlockId bid) {
+		id = bid;
+	}
+
+	public static void loadGameManager(GameManager g) {
+		gm = g;
+		imgList = new PImage[ResManager.imgMaterialId.values().length - 1];
+		ImgIdMessage imgMessage = new ImgIdMessage();
+		imgMessage.materialId = ResManager.imgMaterialId.MATERIAL_00;
+		int startId = imgMessage.getId();
+		for (int i = startId; i < startId + imgList.length; i++) {
+			imgList[i] = gm.res.getImage(i);
+		}
+	}
+
+	public static Block Builder(BlockId id) {
+		Block block = null;
+		switch (id) {
+		case AIR:
+			block = new Block_Air();
+			break;
+		case BLOCK_NORMAL:
+			block = new Block_Normal();
+			break;
+		case BLOCK_SUSPENDED:
+			block = new Block_Suspended();
+			break;
+		case THORN:
+			block = new Block_Thorn();
+			break;
+		default:
+			block = new Block_Error();
+		}
+		return block;
+	}
+
+	public PImage getTexture() {
+		if (id.ordinal() - 1 >= 0)
+			return imgList[id.ordinal() - 1];
+		return null;
+	}
+}

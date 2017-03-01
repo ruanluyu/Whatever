@@ -1,0 +1,13 @@
+package Weapon;
+
+import processing.core.PVector;
+
+public class Particle {
+	public PVector p;
+	public PVector v;
+	public PVector a;
+	public int life;
+	public void update(){
+		p.add(v);
+	}
+}

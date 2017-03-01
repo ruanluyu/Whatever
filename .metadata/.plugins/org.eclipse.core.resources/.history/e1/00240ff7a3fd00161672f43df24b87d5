@@ -1,0 +1,14 @@
+package blocks;
+
+public class Block_Normal extends Block implements FallFeedBack{
+
+	public Block_Normal() {
+		super(Block.BlockId.BLOCK_NORMAL);
+	}
+
+	@Override
+	public void fallToThisBlock() {
+		
+	}
+
+}

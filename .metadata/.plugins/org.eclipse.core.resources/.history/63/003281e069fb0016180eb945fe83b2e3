@@ -1,0 +1,28 @@
+package system;
+
+import processing.core.PApplet;
+
+public class GameAppRun extends PApplet{
+	GameSystem gs ;
+	public static void main(String[] args){
+		GameAppRun app = new GameAppRun();
+		
+		app.runSketch();
+		
+	}
+	@Override
+	public void setup(){
+		gs = new GameSystem(this);
+	}
+	public void draw(){
+		gs.render();
+	}
+	
+	@Override
+	public void settings(){
+		size(800,400);
+		frameRate(30);
+	}
+}
+
+

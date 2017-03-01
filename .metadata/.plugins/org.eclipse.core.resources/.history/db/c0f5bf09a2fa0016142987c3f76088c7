@@ -1,0 +1,6 @@
+package Blocks;
+
+//
+public interface StandFeedBack {
+	public void stand();
+}

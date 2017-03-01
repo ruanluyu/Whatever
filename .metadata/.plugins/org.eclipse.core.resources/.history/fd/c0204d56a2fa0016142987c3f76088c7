@@ -1,0 +1,6 @@
+package Blocks;
+
+//检测到落地并且在此方块上，可以用于设计一些碎砖之类的陷阱。
+public interface FallFeedBack {
+	public void fallToThisBlock();
+}

@@ -1,0 +1,10 @@
+package Blocks;
+
+public class Block_Thorn extends Block{
+
+	public Block_Thorn() {
+		super(Block.BlockId.THORN);
+		
+	}
+	
+}

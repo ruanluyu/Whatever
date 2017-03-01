@@ -1,0 +1,12 @@
+1487946798482	Move compilation unit
+1487947268567	Delete element
+1488008944566	Rename method 'setSenterTo'
+1488009482818	Rename type 'Particular'
+1488011490737	Rename local variable 'angle'
+1488015260932	Move compilation unit
+1488015270032	Rename package 'Weapon'
+1488015281406	Rename package 'Blocks'
+1488027038733	Rename method 'getBlockFromLine'
+1488028529057	Rename type 'FixPosition'
+1488031018003	Rename method 'renderTexture'
+1488032853976	Rename method 'insiede'

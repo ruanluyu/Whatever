@@ -1,0 +1,13 @@
+1488095376848	Rename method 'focusCenterToOrigin'
+1488097918299	Rename method 'setCenterTo'
+1488102273580	Rename type 'Charactor'
+1488106985350	Delete element
+1488110452210	Rename method 'walkCheck'
+1488267143411	Rename field 'fixFunc_FallCheck'
+1488276867298	Move method
+1488279281877	Rename field 'id'
+1488279357313	Rename local variable 'id'
+1488284331674	Delete element
+1488287173501	Rename field 'solacable'
+1488292234058	Rename field 'bodyList'
+1488292237306	Rename field 'faceList'

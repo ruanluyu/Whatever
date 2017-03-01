@@ -1,0 +1,91 @@
+package system;
+
+import processing.core.PVector;
+
+public class Camera {
+	public GameManager gm;
+	public float easing = 0.01f;
+	/**
+	 * 摄像机的横坐标
+	 */
+	public float x;
+
+	/**
+	 * 摄像机的纵坐标
+	 */
+	public float y;
+
+	/**
+	 * 目标位置x
+	 */
+	public float tx;
+	/**
+	 * 目标位置y
+	 */
+	public float ty;
+
+	/**
+	 * target active area extension X 目标自由活动范围（相对于中心点）向x轴两侧扩展的像素数
+	 */
+	private Rectangle targetArea = null;
+
+	/**
+	 * 摄像机活动范围
+	 */
+	public Rectangle area = null;
+
+	public Camera(Rectangle area) {
+		this.area = area;
+	}
+
+	public Camera(GameManager m) {
+		gm = m;
+		float w = gm.parent.width;
+		float h = gm.parent.height;
+		float mw = gm.map.width * Map.BLOCKSIZE;
+		float mh = gm.map.height * Map.BLOCKSIZE;
+		area = new Rectangle(w / 2, h / 2, mw - w, mh - h);
+		targetArea = new Rectangle(0, 0, w / 2, h / 2);
+	}
+
+	public void setTarget(int tx, int ty) {
+		this.tx = tx;
+		this.ty = ty;
+	}
+
+	public void setActiveArea(Rectangle r) {
+		targetArea = r;
+	}
+
+	public void update() {
+		targetArea.setCenterTo(x, y);
+		if (!targetArea.inside(tx, ty)) {
+			if (tx <= targetArea.x1) {
+				x += easing * (targetArea.x1 - x);
+			} else if (tx >= targetArea.x2) {
+				x += easing * (targetArea.x2 - x);
+			}
+			if (ty <= targetArea.y1) {
+				y += easing * (targetArea.y1 - y);
+			} else if (ty >= targetArea.y2) {
+				y += easing * (targetArea.y2 - y);
+			}
+		}
+		limitCheck();
+		System.out.println(x + " " + y);
+	}
+
+	private void limitCheck() {
+		if (x < area.x1) {
+			x = area.x1;
+		} else if (x > area.x2) {
+			x = area.x2;
+		}
+		if (y < area.y1) {
+			y = area.y1;
+		} else if (y > area.y2) {
+			y = area.y2;
+		}
+	}
+
+}

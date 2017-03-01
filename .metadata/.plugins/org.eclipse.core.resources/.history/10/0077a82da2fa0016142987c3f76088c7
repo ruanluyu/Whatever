@@ -1,0 +1,6 @@
+package Blocks;
+
+//
+public interface TouchFeedBack {
+	public void touch();
+}

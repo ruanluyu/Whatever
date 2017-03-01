@@ -1,0 +1,9 @@
+package Blocks;
+
+public class Block_Air extends Block{
+
+	public Block_Air() {
+		super(Block.BlockId.AIR);
+	}
+
+}

@@ -1,0 +1,12 @@
+package Weapon;
+
+import Weapon.Weapon.WeaponProperties;
+
+public abstract class Bullet extends Particle{
+	int strike ;
+	public Bullet(int x, int y, WeaponProperties pro) {
+		super(x, y, pro.bulletLife);
+		strike = pro.strike;
+	}
+	
+}

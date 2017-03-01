@@ -1,0 +1,23 @@
+package blocks;
+
+import system.RenderableFromCamera;
+
+public class Block_Normal extends Block implements FallFeedBack,RenderableFromCamera{
+
+	public Block_Normal() {
+		super(Block.BlockId.BLOCK_NORMAL);
+		gm.renderFClist.add(this);
+	}
+
+	@Override
+	public void fallToThisBlock() {
+		
+	}
+
+	@Override
+	public void renderFromCamera() {
+		// TODO Auto-generated method stub
+		
+	}
+
+}
