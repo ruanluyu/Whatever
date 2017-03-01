@@ -1,12 +1,18 @@
 package weapon;
 
+import processing.core.PApplet;
 import processing.core.PImage;
+import processing.core.PVector;
+import system.GameManager;
+import system.NeedUpdate;
+import system.RenderableFromCamera;
 
-public abstract class Weapon {
+public abstract class Weapon implements NeedUpdate, RenderableFromCamera {
 	public PImage img = null;
 	public Particle_System parSystem = null;
 	public WeaponProperties pro = null;
 	public int coolTime;
+	public static GameManager gm;
 
 	public Weapon() {
 		pro = buildProperties();
@@ -24,7 +30,15 @@ public abstract class Weapon {
 		pro.numOfBullets = pro.numOfBullets <= 0 ? 0 : pro.numOfBullets;
 		coolTime = pro.coolTime;
 	}
-
+	
+	public float getTheta() {
+		return PApplet.atan2(gm.cam.getRealMouseY() - gm.man.getHandPositionY(),
+				gm.cam.getRealMouseX() - gm.man.getHandPositionX());
+	}
+	public void renderFromCamera() {
+		
+		
+	}
 	protected abstract void shootFeedBack(float theta);
 
 	private void updateCoolTime() {

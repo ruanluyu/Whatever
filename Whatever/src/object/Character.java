@@ -8,8 +8,10 @@ import processing.awt.PGraphicsJava2D;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
+import processing.core.PVector;
 import system.ImgIdMessage;
 import system.Map;
+import system.Rectangle;
 import system.ResManager;
 import system.GameManager.Mode;
 
@@ -20,29 +22,31 @@ public class Character extends NewtonObject {
 	public boolean faceToRight = true;
 	public boolean drunk = false;
 	public boolean hold = false;
-	public PGraphics g = new PGraphicsJava2D();
+	public PGraphics g;
 	public PImage copyG = null;
 	public PImage[] facelist;
 	public PImage[] bodylist;
 
+	public Character(int x, int y) {
+		super(30, 75);
+		setP(x, y);
+		g = new PGraphicsJava2D();
+		g.setSize(40, 80);
+		loadBodyList();
+		loadFaceList();
+		bottomCPDis = 5;
+	}
+
 	public void loadFaceList() {
-		facelist = new PImage[ResManager.imgFaceId.values().length - 1];
 		ImgIdMessage imgMessage = new ImgIdMessage();
 		imgMessage.faceId = ResManager.imgFaceId.FACE_00;
-		int startId = imgMessage.getId();
-		for (int i = startId; i < startId + facelist.length; i++) {
-			facelist[i - startId] = gm.res.getImage(i);
-		}
+		facelist = gm.res.getImageSeq(imgMessage.getId(), ResManager.imgFaceId.values().length - 1);
 	}
 
 	public void loadBodyList() {
-		bodylist = new PImage[ResManager.imgBodyId.values().length - 1];
 		ImgIdMessage imgMessage = new ImgIdMessage();
 		imgMessage.bodyId = ResManager.imgBodyId.BODY_00;
-		int startId = imgMessage.getId();
-		for (int i = startId; i < startId + bodylist.length; i++) {
-			bodylist[i - startId] = gm.res.getImage(i);
-		}
+		bodylist = gm.res.getImageSeq(imgMessage.getId(), ResManager.imgBodyId.values().length - 1);
 	}
 
 	private float walkDist = 0;
@@ -51,91 +55,31 @@ public class Character extends NewtonObject {
 	private void walkTime() {
 		walkDist += PApplet.abs(v.x);
 		walkTimer = (int) ((walkDist / 20) % 3);
-		if (walkDist > 10000)
+		if (walkDist > 10000 || !onFloor)
 			walkDist = 0;
 	}
 
 	@Override()
 	public void renderFromCamera() {
 		renderMan();
-		if (flashCoolTime > 0) {
-			gm.parent.blendMode(PApplet.MULTIPLY);
-			gm.parent.image(copyG, ox - body.getWidth() / 2f, oy - body.getHeight());
+		if (flashCoolTime > 0 && copyG != null) {
+			gm.parent.blendMode(2 << (int) gm.parent.random(2, 5));
+			gm.parent.image(copyG, ox - g.width / 2f, oy - g.height);
 			gm.parent.blendMode(PApplet.NORMAL);
 		}
-		gm.parent.image(g, p.x - body.getWidth() / 2f, p.y - body.getHeight());
-	}
-
-	private void renderMan() {
-		g.beginDraw();
-		g.clear();
-		if (!drunk) {
-			if (!hold) {
-				if (onFloor) {
-					if (v.x == 0)
-						renderMan(0, 0);
-					else
-						renderMan(walkTimer, walkTimer);
-				} else
-					renderMan(1, 1);
-			} else {
-				if (onFloor) {
-					if (v.x == 0)
-						renderMan(3, 0);
-					else
-						renderMan(walkTimer + 3, walkTimer);
-				} else
-					renderMan(4, 1);
-			}
-		} else {
-			if (!hold) {
-				if (onFloor) {
-					if (v.x == 0)
-						renderMan(0, 3);
-					else
-						renderMan(walkTimer, walkTimer + 3);
-				} else
-					renderMan(1, 4);
-			} else {
-				if (onFloor) {
-					if (v.x == 0)
-						renderMan(3, 3);
-					else
-						renderMan(walkTimer + 3, walkTimer + 3);
-				} else
-					renderMan(4, 4);
-			}
-		}
-		if (!faceToRight) {
-			PImage mirro = g.copy();
-			g.loadPixels();
-			for (int j = 0; j < g.height; j++) {
-				for (int i = 0; i < g.width; i++) {
-					g.pixels[i + j * g.width] = mirro.pixels[g.width - i - 1 + j * g.width];
-				}
-			}
-			g.updatePixels();
-		}
-		g.endDraw();
-	}
-
-	private void renderMan(int indexBody, int indexFace) {
-		g.image(bodylist[indexBody], 0, 0);
-		g.image(facelist[indexFace], 0, 0);
-	}
-
-	public Character(int x, int y) {
-		super(40, 80);
-		setP(x, y);
-		g.setSize(40, 80);
-		loadBodyList();
-		loadFaceList();
-		bottomCPDis = 5;
+		gm.parent.pushMatrix();
+		gm.parent.translate(p.x, p.y);
+		if (flashCoolTime > 0)
+			renderRatio(1 - flashCoolTime / (float) flashCoolTimeLength, 255, 0, 0, 0, -90);
+		gm.parent.image(g, -g.width / 2f, -g.height);
+		gm.parent.noFill();
+		//gm.parent.rect(-body.getWidth() / 2f, -body.getHeight(), body.getWidth(), body.getHeight());
+		gm.parent.popMatrix();
 	}
 
 	private float flashDist = 40;
 	private final int flashCoolTimeLength = 60;
-	private int flashCoolTime = 0;
+	private int flashCoolTime = 60;
 	private float ox = -1;
 	private float oy = -1;
 
@@ -154,9 +98,8 @@ public class Character extends NewtonObject {
 				flashCoolTime = flashCoolTimeLength;
 				copyG = g.copy();
 			}
-		} else {
+		} else
 			flashCoolTime--;
-		}
 	}
 
 	public void runRight() {
@@ -239,5 +182,78 @@ public class Character extends NewtonObject {
 		walkCheck();
 		dieCheck();
 		walkTime();
+	}
+
+	private void renderMan() {
+		g.beginDraw();
+		g.clear();
+		if (!drunk) {
+			if (!hold) {
+				if (onFloor) {
+					if (v.x == 0)
+						renderMan(0, 0);
+					else
+						renderMan(walkTimer, walkTimer);
+				} else
+					renderMan(1, 1);
+			} else {
+				if (onFloor) {
+					if (v.x == 0)
+						renderMan(3, 0);
+					else
+						renderMan(walkTimer + 3, walkTimer);
+				} else
+					renderMan(4, 1);
+			}
+		} else {
+			if (!hold) {
+				if (onFloor) {
+					if (v.x == 0)
+						renderMan(0, 3);
+					else
+						renderMan(walkTimer, walkTimer + 3);
+				} else
+					renderMan(1, 4);
+			} else {
+				if (onFloor) {
+					if (v.x == 0)
+						renderMan(3, 3);
+					else
+						renderMan(walkTimer + 3, walkTimer + 3);
+				} else
+					renderMan(4, 4);
+			}
+		}
+		if (!faceToRight) {
+			PImage cur = gm.res.getMirroImage(g.copy());
+			g.clear();
+			g.image(cur, 0, 0);
+		}
+		g.endDraw();
+	}
+
+	private void renderMan(int indexBody, int indexFace) {
+		g.image(bodylist[indexBody], 0, 0);
+		g.image(facelist[indexFace], 0, 0);
+	}
+
+	public float getHandPositionX() {
+		return p.x + 15;
+	}
+
+	public float getHandPositionY() {
+		return p.y - 50;
+	}
+
+	public void renderRatio(float ratio, int r, int g, int b, int x, int y) {
+		gm.parent.pushMatrix();
+		gm.parent.translate(x, y);
+		gm.parent.fill(r, g, b);
+		gm.parent.noStroke();
+		gm.parent.rect(-25, -2, 50 * gm.parent.constrain(ratio, 0, 1), 4 );
+		gm.parent.noFill();
+		gm.parent.stroke(r, g, b);
+		gm.parent.rect(-25, -2, 50, 4);
+		gm.parent.popMatrix();
 	}
 }

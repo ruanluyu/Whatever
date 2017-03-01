@@ -2,6 +2,7 @@ package system;
 
 import ddf.minim.AudioPlayer;
 import ddf.minim.Minim;
+import processing.core.PApplet;
 import processing.core.PImage;
 
 public class ResManager {
@@ -25,11 +26,8 @@ public class ResManager {
 		String soundPath = "./res/bgm/gun_00.wav," + "./res/bgm/gun_01.wav," + "./res/bgm/gun_02.wav,";
 		/////////////////// IMG
 		// MATERIAL
-		String imgPath = "./res/map/Material_00.png,"
-				+ "./res/map/Material_01.png,"
-				+ "./res/map/Material_02.png,"
-				+ "./res/map/Material_03.png,"
-				+ "./res/map/Material_03_t.png,";
+		String imgPath = "./res/map/Material_00.png," + "./res/map/Material_01.png," + "./res/map/Material_02.png,"
+				+ "./res/map/Material_03.png," + "./res/map/Material_03_t.png,";
 		// BULLET
 		imgPath += "./res/obj/bullet/bullet_00.png," + "./res/obj/bullet/bullet_01.png,";
 		// BODY
@@ -86,11 +84,11 @@ public class ResManager {
 	public void loadSound(String path) {
 		aplist[apPos++] = minim.loadFile(path);
 	}
-	
+
 	public enum imgMaterialId {
 		NULL, MATERIAL_00, MATERIAL_01, MATERIAL_02, MATERIAL_03, MATERIAL_03_T,
 	}
-	
+
 	public enum imgBulletId {
 		NULL, BULLET_00, BULLET_01,
 	}
@@ -111,8 +109,22 @@ public class ResManager {
 		NULL, WEAPON00, WEAPON01,
 	}
 
-	
+	public PImage[] getImageSeq(int startId, int length) {
+		PImage img[] = new PImage[length];
+		for (int i = 0; i < length; i++)
+			img[i] = imglist[startId + i];
+		return img;
+	}
 
-	
+	public PImage getMirroImage(PImage img) {
+		PImage mirro = gm.parent.createImage(img.width, img.height, PApplet.ARGB);
+		mirro.loadPixels();
+		for (int j = 0; j < mirro.height; j++) {
+			for (int i = 0; i < mirro.width; i++)
+				mirro.pixels[i + j * mirro.width] = img.pixels[img.width - i - 1 + j * img.width];
+		}
+		mirro.updatePixels();
+		return mirro;
+	}
 
 }

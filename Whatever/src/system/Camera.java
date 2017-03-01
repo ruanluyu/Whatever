@@ -69,5 +69,19 @@ public class Camera implements NeedUpdate{
 			p.y = area.p2y();
 		}
 	}
+	public void startCam() {
+		gm.parent.pushMatrix();
+		gm.parent.translate(gm.parent.width / 2f - gm.cam.p.x, gm.parent.height / 2f - gm.cam.p.y);
+	}
 
+	public void endCam() {
+		gm.parent.popMatrix();
+	}
+	
+	public float getRealMouseX(){
+		return gm.parent.mouseX+area.p1x();
+	}
+	public float getRealMouseY(){
+		return gm.parent.mouseY+area.p1y();
+	}
 }

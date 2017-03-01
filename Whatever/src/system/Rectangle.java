@@ -21,8 +21,8 @@ public class Rectangle {
 		checkPoint();
 		center.set(p1);
 	}
-	
-	public void checkPoint(){
+
+	public void checkPoint() {
 		if (p1.x > p2.x) {
 			float xc = p1.x;
 			p1.x = p2.x;
@@ -57,12 +57,16 @@ public class Rectangle {
 		updateSize();
 	}
 
-	public void setCneterPoint(float ratioX, float ratioY) {
+	public void setCenterPointByRatio(float ratioX, float ratioY) {
 		center.set(p1.x + size.x * ratioX, p1.y + size.y * ratioY);
 	}
 
+	public void setCenterPointByFloat(float posX, float posY) {
+		center.set(posX, posY);
+	}
+
 	public void setCenterPointToCenter() {
-		setCneterPoint(.5f, .5f);
+		setCenterPointByRatio(.5f, .5f);
 	}
 
 	public void moveCenterTo(float x, float y) {
@@ -85,19 +89,20 @@ public class Rectangle {
 		center.add(p);
 	}
 
-	public void rotate(float theta) {
+	public void rotate(int rotate90) {
 		float a = p1.x - center.x;
 		float b = p1.y - center.y;
-		float c = PApplet.cos(theta);
-		float d = PApplet.sin(theta);
+		float c = PApplet.cos(rotate90 * PApplet.HALF_PI);
+		float d = PApplet.sin(rotate90 * PApplet.HALF_PI);
 		p1.set(a * c - b * d, a * d + b * c).add(center);
 		a = p2.x - center.x;
 		b = p2.y - center.y;
 		p2.set(a * c - b * d, a * d + b * c).add(center);
 		checkPoint();
+		updateSize();
 	}
-	
-	public void render(){
+
+	public void render() {
 		gm.parent.rect(p1.x, p1.y, size.x, size.y);
 	}
 

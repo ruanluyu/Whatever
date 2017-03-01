@@ -1,0 +1,50 @@
+package blocks;
+
+import processing.core.PApplet;
+import system.Map;
+import system.Rectangle;
+import system.RenderableFromCamera;
+
+public class Block_Thorn extends Block implements TouchAreaFeedBack, NeedInitialize, Penetrable,RenderableFromCamera {
+
+	public Block_Thorn(int idx,int idy) {
+		super(Block.BlockId.THORN,idx,idy);
+		buildArea(.3f,.5f);
+	}
+
+	public Block_Thorn(int r90,int idx,int idy) {
+		this(idx,idy);
+		rotate90 = r90;
+		area.rotate(r90);
+	}
+
+	@Override
+	public void touchArea(Rectangle rec) {
+		if (!rec.intersected(area)) {
+			System.out.println("false");
+			return;
+		}
+		System.out.println("true");
+		type = Block.BlockId.THORN_T;
+		gm.man.kill();
+	}
+
+	@Override
+	public void initialize() {
+		type = Block.BlockId.THORN;
+	}
+
+	@Override
+	public void penetrate() {
+
+	}
+
+	@Override
+	public void renderFromCamera() {
+		
+		
+	}
+
+	
+
+}

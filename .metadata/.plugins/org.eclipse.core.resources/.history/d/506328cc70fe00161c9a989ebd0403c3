@@ -1,0 +1,233 @@
+package system;
+
+import java.util.ArrayList;
+
+import blocks.Block;
+import processing.core.PApplet;
+import processing.core.PImage;
+import system.GameManager.Mode;
+import weapon.Weapon;
+import object.Character;
+import object.NewtonObject;
+
+public class GameSystem {
+	public GameManager gm;
+
+	public GameSystem(PApplet p) {
+		gm = new GameManager();
+		gm.system = this;
+		Rectangle.gm = gm;
+		NewtonObject.gm = gm;
+		Weapon.gm = gm;
+		gm.parent = p;
+		gm.res = new ResManager(gm);
+		gm.res.loadAll();
+		Block.loadGameManager(gm);
+		gm.map = new Map(50, 20, gm);
+		gm.cam = new Camera(gm);
+		gm.akp = new AKeyPress(gm);
+
+		// Cur
+		gm.map.set(0, 9, 25, 9, Block.BlockId.BLOCK_NORMAL);
+		gm.map.set(8, 4, 25, 5, Block.BlockId.BLOCK_SUSPENDED);
+		gm.map.set(10, 8, Block.BlockId.THORN);
+		gm.map.set(13, 8, 14, 8, Block.BlockId.THORN);
+		gm.map.set(17, 8, 18, 8, Block.BlockId.THORN);
+		gm.map.set(7, 4, 7, 5, Block.BlockId.THORN, 3);
+		gm.controlable = true;
+
+		// Load NeedUpdate objects
+		gm.loadNeedUpdateList();
+		gm.loadRenderFCList();
+		gm.loadRenderList();
+	}
+
+	public void render() {
+		synchronized (this) {
+			switch (gm.gameMode) {
+			case RUN:
+				renderRUN();
+				break;
+			case PAUSE:
+				renderPAUSE();
+				break;
+			case DIE:
+				renderDIE();
+				break;
+			case LOAD:
+				renderLOAD();
+				break;
+			case OP:
+				renderOP();
+				break;
+			}
+		}
+	}
+
+	public PImage scShoot;
+
+	public void screenShoot() {
+		scShoot = gm.parent.g.copy();
+	}
+
+	public static void moveNullObject(ArrayList<?> list) {
+		for (int i = list.size() - 1; i >= 0; i--) {
+			if (list.get(i) == null)
+				list.remove(i);
+		}
+	}
+
+	public void createCharacter() {
+		gm.man = new Character(250, 100);
+		gm.die = false;
+		gm.controlable = false;
+		gm.loadRenderFCList();
+		gm.loadNeedUpdateList();
+		gm.loadRenderList();
+	}
+
+	private void renderRUN() {
+		gm.cam.tp.x = gm.man.p.x;
+		gm.cam.tp.y = gm.man.p.y;
+		gm.parent.background(240, 240, 255);
+		for (NeedUpdate nu : gm.updatelist)
+			nu.update();
+		gm.cam.startCam();
+		for (RenderableFromCamera nu : gm.renderFClist)
+			nu.renderFromCamera();
+		gm.cam.endCam();
+		for (Renderable nu : gm.renderlist)
+			nu.render();
+		if (!gm.parent.focused) {
+			pauseGame();
+		}
+		if (gm.die) {
+			screenShoot();
+		}
+	}
+
+	public void pauseGame() {
+		screenShoot();
+		gm.gameMode = Mode.PAUSE;
+		gm.parent.frameRate(4);
+	}
+
+	private int dieTime = 100;
+
+	private void renderDIE() {
+		gm.parent.image(scShoot, 0, 0);
+		gm.parent.textAlign(PApplet.CENTER);
+		gm.parent.fill(255, 0, 0);
+		gm.parent.text("What a loser!", gm.parent.width / 2f, gm.parent.height / 2f);
+		dieTime--;
+		if (dieTime <= 0) {
+			dieTime = 200;
+			startGame();
+		}
+	}
+
+	private void renderPAUSE() {
+		gm.parent.image(scShoot, 0, 0);
+		gm.parent.textAlign(PApplet.CENTER);
+		gm.parent.fill(0, 0, 255);
+		gm.parent.text("- PAUSE -", gm.parent.width / 2f, gm.parent.height / 2f);
+		if (gm.parent.focused && gm.parent.mousePressed) {
+			pauseToRun();
+		}
+
+	}
+
+	public void pauseToRun() {
+		gm.gameMode = Mode.RUN;
+		gm.parent.frameRate(60);
+		gm.akp.init();
+	}
+
+	private int loadTime = 100;
+
+	private void renderLOAD() {
+		gm.parent.background(0);
+		gm.parent.textAlign(PApplet.CENTER);
+		gm.parent.fill(255);
+		gm.parent.text("AssHole " + gm.level, gm.parent.width / 2f, gm.parent.height / 2f - 50);
+		gm.parent.text("Shits " + gm.life, gm.parent.width / 2f, gm.parent.height / 2f + 50);
+		loadTime--;
+
+		if (loadTime <= 0) {
+			loadTime = 100;
+			gm.gameMode = Mode.RUN;
+			gm.controlable = true;
+		}
+	}
+
+	private int opTime = 5;
+	private boolean solecable = true;
+
+	private void renderOP() {
+		gm.parent.background(0);
+		gm.parent.textAlign(PApplet.CENTER);
+		gm.parent.fill(255);
+		gm.parent.text("Whatever", gm.parent.width / 2f, gm.parent.height / 2f - 100);
+		gm.parent.text("Start", gm.parent.width / 2f, gm.parent.height / 2f);
+		gm.parent.text("Load", gm.parent.width / 2f, gm.parent.height / 2f + 50);
+		gm.parent.text("Exit", gm.parent.width / 2f, gm.parent.height / 2f + 100);
+		gm.parent.ellipse(gm.parent.width / 2f - 50, gm.parent.height / 2f - 10 + 50 * gm.selection, 20, 20);
+
+		if (!solecable && opTime <= 0) {
+			opTime = 20;
+			solecable = true;
+		} else if (!solecable)
+			opTime--;
+		if (solecable) {
+			if (gm.akp.keyW()) {
+				gm.selection--;
+				solecable = false;
+			} else if (gm.akp.keyS()) {
+				solecable = false;
+				gm.selection++;
+			} else if (gm.akp.keyBlank()) {
+				solecable = false;
+				switch (gm.selection) {
+				case 0:
+					startGame();
+					break;
+				case 1:
+					loadGame();
+					break;
+				case 2:
+					gm.parent.exit();
+				}
+			}
+		}
+		if (gm.selection < 0)
+			gm.selection = 2;
+		else if (gm.selection > 2)
+			gm.selection = 0;
+	}
+
+	private void startGame() {
+		gm.parent.frameRate(60);
+		gm.gameMode = Mode.LOAD;
+		gm.controlable = false;
+		createCharacter();
+		gm.map.initBlocks();
+	}
+
+	private void loadGame() {
+		gm.parent.frameRate(3);
+		// TODO
+	}
+
+	public void escPressed() {
+		switch(gm.gameMode){
+		case RUN:
+			pauseGame();
+			break;
+		case PAUSE:
+			pauseToRun();
+			break;
+			
+		}
+	}
+
+}

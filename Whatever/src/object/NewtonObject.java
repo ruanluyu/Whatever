@@ -31,7 +31,7 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 	public NewtonObject(int width, int height) {
 		body = new Rectangle(0, 0, width, height);
 		body.translate(-width / 2f, -height);
-		body.setCneterPoint(.5f, 1);
+		body.setCenterPointByRatio(.5f, 1);
 		lastBody = body.clone();
 		bottomCPDis = (width - 1) / 2f;
 		upCPDis = bottomCPDis;
@@ -198,6 +198,11 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 
 	public void update() {
 		nobjUpdate();
+		userUpdate();
+	}
+
+	public void userUpdate() {
+
 	}
 
 	public void setP(float x, float y) {

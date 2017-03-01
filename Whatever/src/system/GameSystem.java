@@ -6,17 +6,19 @@ import blocks.Block;
 import processing.core.PApplet;
 import processing.core.PImage;
 import system.GameManager.Mode;
+import weapon.Weapon;
 import object.Character;
 import object.NewtonObject;
 
 public class GameSystem {
-	GameManager gm;
+	public GameManager gm;
 
-	GameSystem(PApplet p) {
+	public GameSystem(PApplet p) {
 		gm = new GameManager();
 		gm.system = this;
 		Rectangle.gm = gm;
 		NewtonObject.gm = gm;
+		Weapon.gm = gm;
 		gm.parent = p;
 		gm.res = new ResManager(gm);
 		gm.res.loadAll();
@@ -26,10 +28,12 @@ public class GameSystem {
 		gm.akp = new AKeyPress(gm);
 
 		// Cur
-		gm.map.set(10, 10, 18, 10, Block.BlockId.BLOCK_NORMAL);
-		gm.map.set(8, 11, 25, 15, Block.BlockId.BLOCK_SUSPENDED);
-		gm.map.set(25, 13, 49, 15, Block.BlockId.THORN);
-
+		gm.map.set(0, 9, 25, 9, Block.BlockId.BLOCK_NORMAL);
+		gm.map.set(8, 4, 25, 5, Block.BlockId.BLOCK_SUSPENDED);
+		gm.map.set(10, 8, Block.BlockId.THORN);
+		gm.map.set(13, 8, 14, 8, Block.BlockId.THORN);
+		gm.map.set(17, 8, 18, 8, Block.BlockId.THORN);
+		gm.map.set(7, 4, 7, 5, Block.BlockId.THORN, 3);
 		gm.controlable = true;
 
 		// Load NeedUpdate objects
@@ -74,9 +78,9 @@ public class GameSystem {
 	}
 
 	public void createCharacter() {
-		gm.man = new Character(500, 100);
+		gm.man = new Character(250, 100);
 		gm.die = false;
-		gm.controlable = true;
+		gm.controlable = false;
 		gm.loadRenderFCList();
 		gm.loadNeedUpdateList();
 		gm.loadRenderList();
@@ -85,24 +89,26 @@ public class GameSystem {
 	private void renderRUN() {
 		gm.cam.tp.x = gm.man.p.x;
 		gm.cam.tp.y = gm.man.p.y;
+		gm.parent.background(240, 240, 255);
 		for (NeedUpdate nu : gm.updatelist)
 			nu.update();
-		gm.parent.background(240, 240, 255);
-		gm.parent.pushMatrix();
-		gm.parent.translate(gm.parent.width / 2f - gm.cam.p.x, gm.parent.height / 2f - gm.cam.p.y);
+		gm.cam.startCam();
 		for (RenderableFromCamera nu : gm.renderFClist)
 			nu.renderFromCamera();
-		gm.parent.popMatrix();
+		gm.cam.endCam();
 		for (Renderable nu : gm.renderlist)
 			nu.render();
 		if (!gm.parent.focused) {
-			screenShoot();
-			gm.gameMode = Mode.PAUSE;
-			gm.parent.frameRate(4);
+			pauseGame();
 		}
 		if (gm.die) {
 			screenShoot();
 		}
+	}
+
+	public void pauseGame() {
+		screenShoot();
+		gm.gameMode = Mode.PAUSE;
 	}
 
 	private int dieTime = 100;
@@ -123,13 +129,20 @@ public class GameSystem {
 		gm.parent.image(scShoot, 0, 0);
 		gm.parent.textAlign(PApplet.CENTER);
 		gm.parent.fill(0, 0, 255);
+		gm.parent.blendMode(PApplet.MULTIPLY);
+		gm.parent.textSize(30);
 		gm.parent.text("- PAUSE -", gm.parent.width / 2f, gm.parent.height / 2f);
-		if (gm.parent.focused) {
-			gm.gameMode = Mode.RUN;
-			gm.parent.frameRate(60);
-			gm.akp.init();
-		}
+		gm.parent.textSize(20);
+		gm.parent.text("Press 'Esc' to continue", gm.parent.width / 2f, gm.parent.height / 2f + 50);
+		gm.parent.noLoop();
+		gm.parent.blendMode(PApplet.NORMAL);
+	}
 
+	public void pauseToRun() {
+		gm.gameMode = Mode.RUN;
+		gm.parent.frameRate(60);
+		gm.akp.init();
+		gm.parent.loop();
 	}
 
 	private int loadTime = 100;
@@ -138,12 +151,14 @@ public class GameSystem {
 		gm.parent.background(0);
 		gm.parent.textAlign(PApplet.CENTER);
 		gm.parent.fill(255);
-		gm.parent.text("AssHole " + gm.level, gm.parent.width / 2f, gm.parent.height / 2f - 50);
-		gm.parent.text("Shits " + gm.life, gm.parent.width / 2f, gm.parent.height / 2f + 50);
+		gm.parent.textSize(40);
+		gm.parent.text("AssHole: " + gm.level, gm.parent.width / 2f, gm.parent.height / 2f - 50);
+		gm.parent.text("Shits: " + gm.life, gm.parent.width / 2f, gm.parent.height / 2f + 50);
 		loadTime--;
 		if (loadTime <= 0) {
 			loadTime = 100;
 			gm.gameMode = Mode.RUN;
+			gm.controlable = true;
 		}
 	}
 
@@ -151,7 +166,6 @@ public class GameSystem {
 	private boolean solecable = true;
 
 	private void renderOP() {
-		gm.parent.frameRate(30);
 		gm.parent.background(0);
 		gm.parent.textAlign(PApplet.CENTER);
 		gm.parent.fill(255);
@@ -196,12 +210,31 @@ public class GameSystem {
 	private void startGame() {
 		gm.parent.frameRate(60);
 		gm.gameMode = Mode.LOAD;
+		gm.controlable = false;
 		createCharacter();
+		gm.map.initBlocks();
 	}
 
 	private void loadGame() {
 		gm.parent.frameRate(3);
 		// TODO
+	}
+
+	public void escPressed() {
+		switch (gm.gameMode) {
+		case RUN:
+			if (!gm.die)
+				pauseGame();
+			break;
+		case PAUSE:
+			pauseToRun();
+			break;
+		case OP:
+			gm.parent.exit();
+			break;
+		default:
+			break;
+		}
 	}
 
 }

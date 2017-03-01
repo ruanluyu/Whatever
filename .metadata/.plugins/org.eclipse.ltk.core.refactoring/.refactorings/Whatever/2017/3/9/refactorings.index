@@ -1,0 +1,12 @@
+1488345553236	Rename method 'init'
+1488345646171	Rename method 'initBlock'
+1488346360844	Rename method 'setCneterPoint'
+1488346463053	Rename method 'setCneterPointByRatio'
+1488347330410	Rename type 'blockModifier'
+1488347808842	Move type
+1488347814979	Move field
+1488347817697	Move field
+1488348430590	Move methods
+1488351084619	Rename local variable 'theta'
+1488352589998	Move method
+1488364133187	Rename local variable 'id'

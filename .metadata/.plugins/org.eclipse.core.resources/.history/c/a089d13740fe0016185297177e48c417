@@ -1,0 +1,29 @@
+package blocks;
+
+import system.Map;
+import system.Rectangle;
+
+public class Block_Thorn extends Block implements TouchFeedBack, NeedInitialize {
+
+	public Block_Thorn() {
+		super(Block.BlockId.THORN);
+		area = new Rectangle(0,0,Map.BLOCKSIZE,Map.BLOCKSIZE);
+	}
+
+	public Block_Thorn(int r90) {
+		this();
+		rotate90 = r90;
+	}
+
+	@Override
+	public void touch(Rectangle rec) {
+		type = Block.BlockId.THORN_T;
+		gm.man.kill();
+	}
+
+	@Override
+	public void initialize() {
+		type = Block.BlockId.THORN;
+	}
+
+}

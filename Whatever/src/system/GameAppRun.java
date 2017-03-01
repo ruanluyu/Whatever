@@ -24,18 +24,22 @@ public class GameAppRun extends PApplet {
 
 	public void draw() {
 		gs.render();
-		fill(255, 0, 0);
-		text("fps : " + round(frameRate), 0, 0);
+		//fill(255, 0, 0);
+		//text("fps : " + round(frameRate), 0, 0);
 	}
 
 	@Override
 	public void settings() {
 		size(800, 400);
 	}
-
+	
 	@Override
 	public void keyPressed() {
 		gs.gm.akp.checkKeyPressed();
+		if(key == this.ESC){
+			key = '/';
+			gs.escPressed();
+		}
 	}
 
 	public void keyReleased() {

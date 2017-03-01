@@ -1,0 +1,36 @@
+Adobe After Effects v12.0 (Windows 64) render log for project ¡°Meterial.aep¡±
+
+Rendering started on 2016/1/16 at 13:10:48
+
+
+  2016/1/16 13:10:48: Starting composition ¡°weapon¡±.
+
+
+  Output To:E:\Processing\Whatever\Whatever\data\obj\weapon\weapon_[##].png
+  
+  2016/1/16 13:10:48: Finished composition ¡°weapon¡±.
+
+
+
+  2016/1/16 13:10:48: Starting composition ¡°bullet¡±.
+
+
+  Output To:E:\Processing\Whatever\Whatever\data\obj\bullet\bullet_[##].png
+  
+  2016/1/16 13:10:48: Finished composition ¡°bullet¡±.
+
+
+
+  2016/1/16 13:10:48: Starting composition ¡°monster¡±.
+
+
+  Output To:E:\Processing\Whatever\Whatever\data\obj\monster\monster_[##].png
+  
+  2016/1/16 13:10:48: Finished composition ¡°monster¡±.
+
+
+
+  Total Time Elapsed: 0 Seconds
+
+Log closed on 2016/1/16 at 13:10:48
+
