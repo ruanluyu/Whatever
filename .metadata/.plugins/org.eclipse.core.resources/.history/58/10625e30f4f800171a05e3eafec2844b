@@ -1,0 +1,13 @@
+package blocks;
+
+import processing.core.PImage;
+import system.GameManager;
+
+public class Item {
+	public static PImage[] imgList = null;
+	
+	public static void loadGameManager(GameManager g) {
+		gm = g;
+		imgList = gm.res.materialImgList;
+	}
+}

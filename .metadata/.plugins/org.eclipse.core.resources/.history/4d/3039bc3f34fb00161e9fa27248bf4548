@@ -1,9 +1,0 @@
-package Weapon;
-
-public class Bullet extends Particle{
-
-	public Bullet(int x, int y, int lf) {
-		super(x, y, lf);
-	}
-	
-}

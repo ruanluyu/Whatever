@@ -1,6 +1,0 @@
-package system;
-
-public interface Renderable {
-	public void render();
-	public void render(Camera c);
-}

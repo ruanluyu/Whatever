@@ -1,0 +1,26 @@
+package blocks;
+
+
+import processing.core.PImage;
+import system.GameManager;
+
+public class Item {
+	public ItemId type = ItemId.ERROR;
+	protected static PImage[] imgList = null;
+	public static GameManager gm = null;
+	
+	public static enum ItemId {
+		ERROR, BEER,
+	}
+	
+	public static void loadGameManager(GameManager g) {
+		gm = g;
+		imgList = gm.res.itemImgList;
+	}
+	
+	public PImage getTexture() {
+		if (type.ordinal() - 1 >= 0 && type.ordinal() < imgList.length)
+			return imgList[type.ordinal() - 1];
+		return null;
+	}
+}

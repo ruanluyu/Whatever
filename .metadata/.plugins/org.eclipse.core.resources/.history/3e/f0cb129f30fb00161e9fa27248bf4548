@@ -1,7 +1,0 @@
-package Weapon;
-
-public class Particle {
-	PVector p;
-	PVector v;
-	int life;
-}

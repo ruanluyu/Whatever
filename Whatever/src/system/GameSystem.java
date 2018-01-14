@@ -12,6 +12,9 @@ import object.NewtonObject;
 
 public class GameSystem {
 	public GameManager gm;
+	
+	private static final int DIETIME = 80;
+	private static final int LOADTIME = 45;
 
 	public GameSystem(PApplet p) {
 		gm = new GameManager();
@@ -26,7 +29,7 @@ public class GameSystem {
 		gm.map = new Map(50, 20, gm);
 		gm.cam = new Camera(gm);
 		gm.akp = new AKeyPress(gm);
-
+		gm.animator = new Animator(gm);
 		// Cur
 		gm.map.set(0, 9, 25, 9, Block.BlockId.BLOCK_NORMAL);
 		gm.map.set(8, 4, 25, 5, Block.BlockId.BLOCK_SUSPENDED);
@@ -103,6 +106,7 @@ public class GameSystem {
 		}
 		if (gm.die) {
 			screenShoot();
+			gm.manKilledUpdate();
 		}
 	}
 
@@ -110,17 +114,19 @@ public class GameSystem {
 		screenShoot();
 		gm.gameMode = Mode.PAUSE;
 	}
-
-	private int dieTime = 100;
-
+	
+	
+	private int dieTime = DIETIME;
+	
 	private void renderDIE() {
 		gm.parent.image(scShoot, 0, 0);
 		gm.parent.textAlign(PApplet.CENTER);
+		gm.parent.textSize(40);
 		gm.parent.fill(255, 0, 0);
 		gm.parent.text("What a loser!", gm.parent.width / 2f, gm.parent.height / 2f);
 		dieTime--;
 		if (dieTime <= 0) {
-			dieTime = 200;
+			dieTime = DIETIME;
 			startGame();
 		}
 	}
@@ -144,8 +150,8 @@ public class GameSystem {
 		gm.akp.init();
 		gm.parent.loop();
 	}
-
-	private int loadTime = 100;
+	
+	private int loadTime = LOADTIME;
 
 	private void renderLOAD() {
 		gm.parent.background(0);
@@ -156,7 +162,7 @@ public class GameSystem {
 		gm.parent.text("Shits: " + gm.life, gm.parent.width / 2f, gm.parent.height / 2f + 50);
 		loadTime--;
 		if (loadTime <= 0) {
-			loadTime = 100;
+			loadTime = LOADTIME;
 			gm.gameMode = Mode.RUN;
 			gm.controlable = true;
 		}

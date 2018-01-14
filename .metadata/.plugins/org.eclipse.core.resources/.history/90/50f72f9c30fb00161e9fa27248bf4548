@@ -1,7 +1,0 @@
-package Weapon;
-
-public class Particle {
-	int x;
-	int y;
-	int life;
-}

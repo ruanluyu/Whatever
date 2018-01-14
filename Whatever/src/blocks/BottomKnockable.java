@@ -1,7 +1,7 @@
 package blocks;
 /**
  * 这个方块可以被头顶！
- * @author ZzStarSound
+ * @author Hosine
  *
  */
 public interface BottomKnockable {

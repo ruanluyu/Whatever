@@ -1,5 +1,0 @@
-package Blocks;
-
-public class Block_Suspended extends Block_Normal{
-	
-}

@@ -17,7 +17,6 @@
 <fullyQualifiedTypeName name="blocks.Block.BlockId"/>
 <fullyQualifiedTypeName name="object.NewtonObject"/>
 <fullyQualifiedTypeName name="system.Renderable"/>
-<fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="blocks.BottomKnockable"/>
 <fullyQualifiedTypeName name="blocks.FallFeedBack"/>
 <fullyQualifiedTypeName name="blocks.Block"/>
@@ -27,9 +26,7 @@
 <fullyQualifiedTypeName name="system.GameSystem.Mode"/>
 <fullyQualifiedTypeName name="system.GameManager.Mode"/>
 <fullyQualifiedTypeName name="blocks.Block_Air"/>
-<fullyQualifiedTypeName name="processing.core.PGraphics"/>
 <fullyQualifiedTypeName name="processing.awt.PGraphicsJava2D"/>
-<fullyQualifiedTypeName name="processing.core.PImage"/>
 <fullyQualifiedTypeName name="blocks.NeedInitialize"/>
 <fullyQualifiedTypeName name="blocks.TouchAreaFeedBack"/>
 <fullyQualifiedTypeName name="system.Map"/>
@@ -37,7 +34,11 @@
 <fullyQualifiedTypeName name="system.NeedUpdate"/>
 <fullyQualifiedTypeName name="system.RenderableFromCamera"/>
 <fullyQualifiedTypeName name="system.GameManager"/>
-<fullyQualifiedTypeName name="processing.core.PVector"/>
 <fullyQualifiedTypeName name="weapon.Weapon"/>
 <fullyQualifiedTypeName name="processing.core.PApplet"/>
+<fullyQualifiedTypeName name="processing.core.PGraphics"/>
+<fullyQualifiedTypeName name="processing.core.PVector"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="processing.core.PImage"/>
+<fullyQualifiedTypeName name="system.ResManager.imgBulletId"/>
 </qualifiedTypeNameHistroy>

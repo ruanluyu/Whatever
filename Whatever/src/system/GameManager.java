@@ -14,6 +14,7 @@ public class GameManager {
 	public AKeyPress akp;
 	public Character man;
 	public GameSystem system;
+	public Animator animator;
 	/**
 	 * 需要手动在renderFClist和updateList中注册
 	 */
@@ -36,6 +37,7 @@ public class GameManager {
 		// sign renderable from camera objects up here
 		renderFClist.add(map);
 		renderFClist.add(man);
+		renderFClist.add(animator);
 		// end
 		GameSystem.moveNullObject(renderFClist);
 	}
@@ -49,10 +51,15 @@ public class GameManager {
 		updatelist.add(man);
 		updatelist.add(cam);
 		updatelist.add(map);
+		updatelist.add(animator);
 		// end
 		GameSystem.moveNullObject(updatelist);
 	}
-
+	
+	public void manKilledUpdate(){
+		animator.clear();
+	}
+	
 	// global properties
 	public int level = 1;
 	public int life = 3;

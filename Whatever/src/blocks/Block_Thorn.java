@@ -1,9 +1,7 @@
 package blocks;
 
-import processing.core.PApplet;
-import system.Map;
+
 import system.Rectangle;
-import system.RenderableFromCamera;
 
 public class Block_Thorn extends Block implements TouchAreaFeedBack, NeedInitialize, Penetrable {
 

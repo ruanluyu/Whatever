@@ -1,9 +1,0 @@
-package Weapon;
-
-import processing.core.PVector;
-
-public class Particle {
-	PVector p;
-	PVector v;
-	int life;
-}

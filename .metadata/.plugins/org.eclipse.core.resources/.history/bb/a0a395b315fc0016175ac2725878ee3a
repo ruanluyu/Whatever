@@ -1,9 +1,0 @@
-package blocks;
-/**
- * 检测到小人速度不为0并且在这个方块上走动。
- * @author ZzStarSound
- *
- */
-public interface WalkFeedBack {
-	public void walk();
-}

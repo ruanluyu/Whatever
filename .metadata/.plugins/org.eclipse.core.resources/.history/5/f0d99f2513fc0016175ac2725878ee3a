@@ -1,5 +1,0 @@
-package blocks;
-
-public interface AreaFeedBack {
-	public void targetInside();
-}

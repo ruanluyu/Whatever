@@ -1,7 +1,6 @@
 package blocks;
 
-import system.Map;
-import system.RenderableFromCamera;
+
 
 public class Block_Normal extends Block {
 

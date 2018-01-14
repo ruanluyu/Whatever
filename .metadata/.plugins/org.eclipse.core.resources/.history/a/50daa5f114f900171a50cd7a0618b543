@@ -1,0 +1,137 @@
+package system;
+
+import java.util.ArrayList;
+
+import processing.core.PImage;
+import processing.core.PVector;
+
+public class Animator implements NeedUpdate, RenderableFromCamera {
+	public GameManager gm;
+	protected ArrayList<Element> elist = new ArrayList<Element>();
+
+	public class Element implements NeedUpdate, RenderableFromCamera {
+		public PImage img = null;
+		public float rot = 0;// Radiant
+		public float rotSpeed = 0;// Radiant per frame
+		public PVector p = new PVector();
+		public PVector v = new PVector();
+		public int life = 0;
+		public int age = 0;
+		public float fadeIn = 0f;// 0-1
+		public float fadeOut = 1f;// 0-1
+		public float alpha = 1f;
+
+		public Element() {
+		}
+
+		public Element(PImage img, PVector p, PVector v, int life) {
+			this(img, p, v, 0, 0, life);
+		}
+
+		public Element(PImage img, PVector p, PVector v, float r, float rSp, int life) {
+			this.img = img;
+			this.p.set(p);
+			this.v.set(v);
+			this.life = life;
+			this.rot = r;
+			this.rotSpeed = rSp;
+		}
+
+		@Override
+		public void update() {
+			if (age < life)
+				age++;
+			else
+				return;
+			p.add(v);
+			rot += rotSpeed;
+			calculateAlpha();
+		}
+
+		private void calculateAlpha() {
+			float nage = ((float) age) / life;
+			float inValue = (fadeIn == 0 ? (1f) : (nage / fadeIn));
+			if (inValue > 1f)
+				inValue = 1f;
+
+			float nage2 = 1 - nage;
+			float outValue = (fadeOut == 0 ? (1f) : (nage2 / fadeOut));
+			if (outValue > 1f)
+				outValue = 1f;
+
+			alpha = 1f * outValue * inValue;
+		}
+
+		@Override
+		public void renderFromCamera() {
+			if (img == null)
+				return;
+			gm.parent.pushMatrix();
+			gm.parent.translate(p.x, p.y);
+			if (rot != 0)
+				gm.parent.rotate(rot);
+			if (alpha < 1f)
+				gm.parent.tint(255, 255 * alpha);
+			gm.parent.image(img, -img.width / 2f, -img.height / 2f);
+			if (alpha < 1f)
+				gm.parent.tint(255, 255);
+			gm.parent.popMatrix();
+		}
+	}
+
+	public Animator(GameManager gm) {
+		this.gm = gm;
+	}
+
+	public void addAnimation(PImage img, PVector p, PVector v, int life) {
+		elist.add(new Element(img, p, v, life));
+	}
+
+	public void addAnimation(PImage img, PVector p, PVector v, float r, float rSp, int life) {
+		elist.add(new Element(img, p, v, r, rSp, life));
+	}
+
+	@Override
+	public void update() {
+		if (elist.size() == 0)
+			return;
+		for (Element e : elist)
+			e.update();
+		dieCheck();
+	}
+
+	@Override
+	public void renderFromCamera() {
+		if (elist.size() == 0)
+			return;
+		for (Element e : elist)
+			e.renderFromCamera();
+	}
+
+	public void dieCheck() {
+		if (elist.size() == 0)
+			return;
+		for (int i = elist.size() - 1; i >= 0; i--) {
+			if (elist.get(i).age >= elist.get(i).life)
+				elist.remove(i);
+		}
+	}
+
+	public void clear() {
+		elist.clear();
+	}
+
+	/**
+	 * 
+	 * @param channelId
+	 *            (0-RED;1-GREEN;2-BLUE;3-ALPHA.)
+	 */
+	/*
+	 * public static void setChannel(PGraphics pg, int channelId, int toValue) {
+	 * //TODO pg.loadPixels(); switch (channelId) { case 0: break; case 1: break;
+	 * case 2: break; case 3: break; default: } for (int i = 0; i <
+	 * pg.pixels.length; i++) {
+	 * 
+	 * } pg.updatePixels(); }
+	 */
+}

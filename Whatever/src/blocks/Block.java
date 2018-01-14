@@ -2,10 +2,8 @@ package blocks;
 
 import processing.core.PImage;
 import system.GameManager;
-import system.ImgIdMessage;
 import system.Map;
 import system.Rectangle;
-import system.ResManager;
 
 public abstract class Block {
 	public BlockId type = BlockId.ERROR;
@@ -16,7 +14,7 @@ public abstract class Block {
 	protected static PImage[] imgList = null;
 	public static GameManager gm = null;
 
-	public enum BlockId {
+	public static enum BlockId {
 		ERROR, AIR, BLOCK_NORMAL, BLOCK_SUSPENDED, THORN, THORN_T
 	}
 
@@ -42,9 +40,7 @@ public abstract class Block {
 
 	public static void loadGameManager(GameManager g) {
 		gm = g;
-		ImgIdMessage imgMessage = new ImgIdMessage();
-		imgMessage.materialId = ResManager.imgMaterialId.MATERIAL_00;
-		imgList = gm.res.getImageSeq(imgMessage.getId(), ResManager.imgMaterialId.values().length - 1);
+		imgList = gm.res.materialImgList;
 	}
 
 	public static Block Builder(BlockId type, int idx, int idy) {
@@ -70,8 +66,9 @@ public abstract class Block {
 	}
 
 	public PImage getTexture() {
-		if (type.ordinal() - 1 >= 0)
-			return imgList[type.ordinal() - 1];
+		int id = type.ordinal() - 1;
+		if (id >= 0 && id < imgList.length)
+			return imgList[id];
 		return null;
 	}
 }

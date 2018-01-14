@@ -1,9 +1,0 @@
-package blocks;
-
-public class Block_Normal extends Block{
-
-	public Block_Normal() {
-		super(Block.BlockId.BLOCK_NORMAL);
-	}
-
-}

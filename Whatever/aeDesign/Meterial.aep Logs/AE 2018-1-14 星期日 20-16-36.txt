@@ -1,0 +1,12 @@
+Adobe After Effects v14.0 Windows 64 render log for project “Meterial.aep”
+
+Rendering started on 2018/1/14 星期日 at 20:16:36
+
+  2018/1/14 星期日 20:16:36: Starting composition “effect”.
+
+  Output To: G:\works\E\Java\Whatever\Whatever\res\obj\effect\effect_[##].png    2018/1/14 星期日 20:16:36: Finished composition “effect”.
+
+
+  Total Time Elapsed: 0 Seconds
+Log closed on 2018/1/14 星期日 at 20:16:36
+

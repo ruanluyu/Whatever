@@ -1,7 +1,0 @@
-package Blocks;
-
-public interface BottomKnockable {
-	public void bottomKnocked(){
-		
-	}
-}
