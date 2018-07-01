@@ -2,12 +2,12 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="src/processingSupport/core.jar"/>
-	<classpathentry kind="lib" path="src/processingSupport/minim/jl1.0.1.jar"/>
-	<classpathentry kind="lib" path="src/processingSupport/minim/jsminim.jar"/>
-	<classpathentry kind="lib" path="src/processingSupport/minim/minim.jar"/>
-	<classpathentry kind="lib" path="src/processingSupport/minim/mp3spi1.9.5.jar"/>
-	<classpathentry kind="lib" path="src/processingSupport/minim/tritonus_aos.jar"/>
-	<classpathentry kind="lib" path="src/processingSupport/minim/tritonus_share.jar"/>
+	<classpathentry kind="lib" path="lib/core.jar"/>
+	<classpathentry kind="lib" path="lib/minim-2.2.2/library/jl1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/minim-2.2.2/library/jsminim.jar"/>
+	<classpathentry kind="lib" path="lib/minim-2.2.2/library/minim.jar"/>
+	<classpathentry kind="lib" path="lib/minim-2.2.2/library/mp3spi1.9.5.jar"/>
+	<classpathentry kind="lib" path="lib/minim-2.2.2/library/tritonus_aos.jar"/>
+	<classpathentry kind="lib" path="lib/minim-2.2.2/library/tritonus_share.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
