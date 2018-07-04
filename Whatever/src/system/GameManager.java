@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import object.Character;
 import object.NewtonObject;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PVector;
 
 public class GameManager {
@@ -41,6 +42,12 @@ public class GameManager {
 		renderFClist.add(animator);
 		// end
 		GameSystem.moveNullObject(renderFClist);
+		
+		for(RenderableFromCamera rfc : renderFClist) {
+			if(rfc instanceof RenderableLayerFromCamera) {
+				((RenderableLayerFromCamera) rfc).setLayers();
+			}
+		}
 	}
 
 	public ArrayList<NeedUpdate> updatelist = new ArrayList<NeedUpdate>();
@@ -55,6 +62,14 @@ public class GameManager {
 		updatelist.add(animator);
 		// end
 		GameSystem.moveNullObject(updatelist);
+	}
+	
+	public ArrayList<Layer> layers = new ArrayList<Layer>();
+	
+	public void loadLayers() {
+		layers.add(new Layer(this,"Main"));
+		layers.add(new Layer(this,"KillMe",false));
+		layers.add(new Layer(this,"KillMonster",false));
 	}
 	
 	public void manKilledUpdate(){
@@ -86,11 +101,11 @@ public class GameManager {
 	}
 	
 	public float localXToWorldX(float lx) {
-		return PApplet.map(lx,0,parent.width,cam.p.x-cam.area.getWidth()/2f,cam.p.x+cam.area.getWidth()/2f);
+		return PApplet.map(lx,0,GameSystem.WIDTH,cam.p.x-cam.s.x/2f,cam.p.x+cam.s.x/2f);
 	}
 	
 	public float localYToWorldY(float ly) {
-		return PApplet.map(ly,0,parent.height,cam.p.y-cam.area.getHeight()/2f,cam.p.y+cam.area.getHeight()/2f);
+		return PApplet.map(ly,0,GameSystem.HEIGHT,cam.p.y-cam.s.y/2f,cam.p.y+cam.s.y/2f);
 	}
 	
 	public PVector worldToLocal(PVector w) {
@@ -101,11 +116,11 @@ public class GameManager {
 	}
 	
 	public float worldXToLocalX(float wx) {
-		return PApplet.map(wx,cam.p.x-cam.area.getWidth()/2f,cam.p.x+cam.area.getWidth()/2f,0,parent.width);
+		return PApplet.map(wx,cam.p.x-cam.s.x/2f,cam.p.x+cam.s.x/2f,0,GameSystem.WIDTH);
 	}
 	
 	public float worldYToLocalY(float wy) {
-		return PApplet.map(wy,cam.p.y-cam.area.getHeight()/2f,cam.p.y+cam.area.getHeight()/2f,0,parent.height);
+		return PApplet.map(wy,cam.p.y-cam.s.y/2f,cam.p.y+cam.s.y/2f,0,GameSystem.HEIGHT);
 	}
 	
 	public PVector worldVecToLocalVec(PVector wv) {
@@ -118,5 +133,17 @@ public class GameManager {
 		PVector out = new PVector().set(lv);
 		localToWorld(out).sub(localToWorld(new PVector()));
 		return out;
+	}
+	
+	public int findLayerId(String layerName) {
+		int id = -1;
+		for(Layer cl : layers) {
+			id++;
+			if(cl == null) continue;
+			if(cl.name.equals(layerName)) {
+				return id;
+			}
+		}
+		return -1;
 	}
 }

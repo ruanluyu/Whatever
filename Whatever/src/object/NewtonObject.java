@@ -6,8 +6,11 @@ import blocks.FallFeedBack;
 import blocks.Penetrable;
 import blocks.TouchFeedBack;
 import processing.core.PApplet;
+import processing.core.PGraphics;
+import processing.core.PImage;
 import processing.core.PVector;
 import system.GameManager;
+import system.Layer;
 import system.Map;
 import system.NeedUpdate;
 import system.Rectangle;
@@ -24,6 +27,8 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 	public Rectangle lastBody = null;
 	public Rectangle body = null;
 	public boolean onFloor = false;
+	public Layer killLayer = null;
+	public PGraphics pg = null;
 
 	public float bottomCPDis = 10;
 	public float upCPDis = 10;
@@ -35,6 +40,7 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 		lastBody = body.clone();
 		bottomCPDis = (width - 1) / 2f;
 		upCPDis = bottomCPDis;
+		killLayer = gm.layers.get(gm.findLayerId("KillMonster"));
 	}
 
 	public void addGravity() {
@@ -44,6 +50,38 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 
 	private int numOfBodyPoints = 7;
 
+	public void airRightCheck() {
+		if (v.x <= 0)
+			return;
+
+		int numOfCPoints = PApplet.max(numOfBodyPoints, 2 + (int) (body.getHeight() * 2f / Map.BLOCKSIZE));
+		float r = 0;
+		for (int i = 0; i <= numOfCPoints; i++) {
+			r = (float) i / numOfCPoints;
+			checkBlockFromLine(lastP.x + body.getWidth() / 2f, lastP.y - body.getHeight() * r,
+					p.x + body.getWidth() / 2f, p.y - body.getHeight() * r, fixFunc_R);
+			if (v.x == 0) {
+				return;
+			}
+		}
+	}
+	
+	public void airLeftCheck() {
+		if (v.x >= 0)
+			return;
+
+		int numOfCPoints = PApplet.max(numOfBodyPoints, 2 + (int) (body.getHeight() * 2f / Map.BLOCKSIZE));
+		float r = 0;
+		for (float i = 0; i <= numOfCPoints; i++) {
+			r = i / numOfCPoints;
+			checkBlockFromLine(lastP.x - body.getWidth() / 2f, lastP.y - body.getHeight() * r,
+					p.x - body.getWidth() / 2f, p.y - body.getHeight() * r, fixFunc_L);
+			if (v.x == 0) {
+				return;
+			}
+		}
+	}
+	
 	public void rightCheck() {
 		if (v.x <= 0)
 			return;
@@ -117,8 +155,9 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 		onFloor = false;
 		beginFall();
 	}
-	
-	public void beginFall() {}
+
+	public void beginFall() {
+	}
 
 	public int numOfCheckPoints = 3;
 
@@ -221,8 +260,8 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 	public interface PositionFixer {
 		/**
 		 * 
-		 * @param x Detect point X position
-		 * @param y Detect point Y position
+		 * @param x     Detect point X position
+		 * @param y     Detect point Y position
 		 * @param block Tested block
 		 * @author Hosine
 		 */
@@ -254,41 +293,27 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 		public void fix(float x, float y, Block block) {
 			float x1 = x - x % Map.BLOCKSIZE;
 			float y1 = y - y % Map.BLOCKSIZE + Map.BLOCKSIZE;
-			if (!linesIntersected(	0,
-									0,
-									Map.BLOCKSIZE,
-									0,
-									lastP.x + x - p.x - x1,
-									lastP.y + y - p.y - y1,
-									x - x1,
-									y - y1)
-					)
+			if (!linesIntersected(0, 0, Map.BLOCKSIZE, 0, lastP.x + x - p.x - x1, lastP.y + y - p.y - y1, x - x1,
+					y - y1))
 				return;
 			float ry = y + body.getHeight();
 			setP(p.x, ry - ry % Map.BLOCKSIZE + Map.BLOCKSIZE);
 			v.y = -v.y;
-			upKnocked();//pulse signal
+			upKnocked();// pulse signal
 			if (block instanceof BottomKnockable)
 				((BottomKnockable) block).bottomKnocked();
 			if (block instanceof TouchFeedBack)
 				((TouchFeedBack) block).touch();
 		}
 	};
-	
+
 	private PositionFixer fixFunc_F = new PositionFixer() {
 		@Override
 		public void fix(float x, float y, Block block) {
 			float x1 = x - x % Map.BLOCKSIZE;
 			float y1 = y - y % Map.BLOCKSIZE;
-			if (!linesIntersected(	0,
-									0,
-									Map.BLOCKSIZE,
-									0,
-									lastP.x + x - p.x - x1,
-									lastP.y + y - p.y - y1,
-									x - x1,
-									y - y1)
-					)
+			if (!linesIntersected(0, 0, Map.BLOCKSIZE, 0, lastP.x + x - p.x - x1, lastP.y + y - p.y - y1, x - x1,
+					y - y1))
 				return;
 			onFloor = true;
 			int idy = block.idy;
@@ -301,7 +326,7 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 			}
 
 			v.y = 0;
-			fallToFloor();//pulse signal
+			fallToFloor();// pulse signal
 			if (block instanceof FallFeedBack)
 				((FallFeedBack) block).fallToThisBlock();
 			if (block instanceof TouchFeedBack)
@@ -322,6 +347,34 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 				&& (x3 * y4 + x1 * y3 + x4 * y1 - x1 * y4 - x3 * y1 - x4 * y3)
 						* (x3 * y4 + x2 * y3 + x4 * y2 - x2 * y4 - x3 * y2 - x4 * y3) <= 0)
 			return true;
+		return false;
+	}
+
+	public boolean preciseKnockDetect() {
+		if (killLayer == null || pg == null)
+			return false;
+		killLayer.pg.beginDraw();
+		PImage curimg = killLayer.pg.get(
+				(int) gm.worldXToLocalX(p.x - body.getWidth() / 2f)-4,
+				(int) gm.worldYToLocalY(p.y - body.getHeight()), 
+				(int) body.getWidth(), 
+				(int) body.getHeight());
+		killLayer.pg.endDraw();
+		pg.beginDraw();
+		int rx = (int)gm.parent.random(4);
+		int ry = (int)gm.parent.random(8);
+		for (int i = rx; i < curimg.width; i+=4) {
+			if (i >= pg.width)
+				break;
+			for (int j = ry; j < curimg.height; j+=8) {
+				if (j >= pg.height)
+					break;
+				if (gm.parent.alpha(curimg.get(i, j)) / 255f * gm.parent.alpha(pg.get(i, j)) / 255f > .9f) {
+					return true;
+				}
+			}
+		}
+		pg.endDraw();
 		return false;
 	}
 }

@@ -16,9 +16,9 @@ import system.GameManager.Mode;
 
 public class Character extends NewtonObject {
 	public float acc = .2f;
-	public float jumpAcc = 5;
+	public float jumpAcc = 4;
 	public float jumpHoldAcc = 4;
-	public float secJumpAcc = 7;
+	public float secJumpAcc = 6;
 	public int jumpHoldTimeMax = 25;
 	public int jumpHoldTime = jumpHoldTimeMax;
 	public boolean secJumped = false;
@@ -29,7 +29,6 @@ public class Character extends NewtonObject {
 	public boolean faceToRight = true;
 	public boolean drunk = false;
 	public boolean hold = false;
-	public PGraphics g;
 	public PImage copyG = null;
 	public PImage[] facelist;
 	public PImage[] bodylist;
@@ -39,14 +38,15 @@ public class Character extends NewtonObject {
 	public Character(int x, int y) {
 		super(30, 75);
 		setP(x, y);
-		g = new PGraphicsJava2D();
-		g.setSize(40, 80);
+		pg = new PGraphicsJava2D();
+		pg.setSize(40, 80);
 		loadBodyList();
 		loadFaceList();
 		loadEffectImg();
 		loadDrunkEffectImg();
 		loadFlashEffectImg();
 		bottomCPDis = 5;
+		killLayer = gm.layers.get(gm.findLayerId("KillMe"));
 	}
 
 	public void loadFaceList() {
@@ -60,22 +60,22 @@ public class Character extends NewtonObject {
 
 	public void loadEffectImg() {
 		jumpEffectImg = gm.res.bulletImgList[0];
-		flashEffectImg  = gm.res.bulletImgList[1];
+		flashEffectImg = gm.res.bulletImgList[1];
 	}
-	
+
 	public void loadDrunkEffectImg() {
 		int num = 2;
 		drunkEffect = new PImage[num];
-		for(int i = 0;i<num;i++) {
+		for (int i = 0; i < num; i++) {
 			drunkEffect[i] = gm.res.effectImgList[i];
 		}
 	}
-	
+
 	public void loadFlashEffectImg() {
 		int num = 2;
 		flashEffect = new PImage[num];
-		for(int i = 0;i<num;i++) {
-			flashEffect[i] = gm.res.effectImgList[i+2];
+		for (int i = 0; i < num; i++) {
+			flashEffect[i] = gm.res.effectImgList[i + 2];
 		}
 	}
 
@@ -92,18 +92,18 @@ public class Character extends NewtonObject {
 	@Override()
 	public void renderFromCamera() {
 		renderMan();
-		/*if (flashCoolTime > 0 && copyG != null) {
-			gm.parent.blendMode(2 << (int) gm.parent.random(2, 5));
-			gm.parent.image(copyG, ox - g.width / 2f, oy - g.height);
-			gm.parent.blendMode(PApplet.NORMAL);
-		}*/
+		/*
+		 * if (flashCoolTime > 0 && copyG != null) { gm.parent.blendMode(2 << (int)
+		 * gm.parent.random(2, 5)); gm.parent.image(copyG, ox - g.width / 2f, oy -
+		 * g.height); gm.parent.blendMode(PApplet.NORMAL); }
+		 */
 		gm.parent.pushMatrix();
 		gm.parent.translate(p.x, p.y);
 		if (flashCoolTime > 0)
 			renderRatio(1 - flashCoolTime / (float) flashCoolTimeLength, 255, 0, 0, 0, -90);
 		if (drinkValue > 0)
 			renderRatio(drinkValue / drinkMaxValue, 200, 0, 173, 0, -100);
-		gm.parent.image(g, -g.width / 2f, -g.height);
+		gm.parent.image(pg, -pg.width / 2f, -pg.height);
 		gm.parent.noFill();
 		// gm.parent.rect(-body.getWidth() / 2f, -body.getHeight(),
 		// body.getWidth(), body.getHeight());
@@ -128,14 +128,16 @@ public class Character extends NewtonObject {
 				p.x += (faceToRight ? 1 : -1) * flashDist;
 				a.x += (faceToRight ? 1 : -1) * 3;
 				if (faceToRight)
-					this.rightCheck();
+					airRightCheck();
 				else
-					this.leftCheck();
+					airLeftCheck();
 				this.fallCheck();
+				v.x = 0;
 				flashEffect();
 				flashCoolTime = flashCoolTimeLength;
-				copyG = g.copy();
-				gm.animator.addAnimation(copyG, new PVector(ox - g.width / 2f, oy - g.height/2f), new PVector((p.x-ox) * 0.001f,(p.y-oy)*0.001f),0, 0, 0f, 1f, flashCoolTimeLength/3);
+				copyG = pg.copy();
+				gm.animator.addAnimation(copyG, new PVector(ox, oy - pg.height / 2f),
+						new PVector((p.x - ox) * 0.001f, (p.y - oy) * 0.001f), 0, 0, 0f, 1f, flashCoolTimeLength / 3);
 			}
 		} else
 			flashCoolTime--;
@@ -148,59 +150,59 @@ public class Character extends NewtonObject {
 		PVector dir = Pchan.normalize().mult(distDelta).copy();
 		for (int i = 0; i < dist / distDelta; i++) {
 			PImage renderImg = null;
-			if(drunk)
-				renderImg = drunkEffect[gm.parent.floor(gm.parent.random(drunkEffect.length-0.001f))];
+			if (drunk)
+				renderImg = drunkEffect[gm.parent.floor(gm.parent.random(drunkEffect.length - 0.001f))];
 			else
-				renderImg = flashEffect[gm.parent.floor(gm.parent.random(flashEffect.length-0.001f))];
+				renderImg = flashEffect[gm.parent.floor(gm.parent.random(flashEffect.length - 0.001f))];
 			gm.animator.addAnimation(renderImg,
-					PVector.add(lastP, PVector.mult(Pchan, i)).add(0, -this.body.getHeight() / 2f+gm.parent.random(-20,20)),
+					PVector.add(lastP, PVector.mult(Pchan, i)).add(0,
+							-this.body.getHeight() / 2f + gm.parent.random(-20, 20)),
 					PVector.mult(dir, .1f * gm.parent.random(1)).rotate(gm.parent.random(3.14f / 6) - 3.14f / 12),
-					gm.parent.random(4),
-					gm.parent.random(-.1f,.1f),
-					0,
-					1f,
-					10 * i);
+					gm.parent.random(4), gm.parent.random(-.1f, .1f), 0, 1f, 10 * i);
 		}
 	}
+
 	public float drinkValue = 250;
 	public float drinkMaxValue = 1000;
+
 	public void drunkCalculate() {
-		if(drinkValue >0) {
-			if (drinkValue>drinkMaxValue)drinkValue = drinkMaxValue;
+		if (drinkValue > 0) {
+			if (drinkValue > drinkMaxValue)
+				drinkValue = drinkMaxValue;
 			drunk = true;
-			drinkValue --;
-			int num = (gm.parent.random(1)<(drinkValue/drinkMaxValue)*.8f+.01f)?(1):(0);
-			PVector dir = new PVector(0,-0.7f);
-			for(int i = 0;i<num;i++) {
-				gm.animator.addAnimation(drunkEffect[gm.parent.floor(gm.parent.random(drunkEffect.length-0.001f))],
-						new PVector(p.x+gm.parent.random(-10,10),p.y-70+gm.parent.random(-10,10)), 
-						dir, 
-						gm.parent.random(4), 
-						gm.parent.random(-0.2f,0.2f), 
-						0.2f,
-						0.3f, 
-						20);
+			drinkValue--;
+			int num = (gm.parent.random(1) < (drinkValue / drinkMaxValue) * .8f + .01f) ? (1) : (0);
+			PVector dir = new PVector(0, -0.7f);
+			for (int i = 0; i < num; i++) {
+				gm.animator.addAnimation(drunkEffect[gm.parent.floor(gm.parent.random(drunkEffect.length - 0.001f))],
+						new PVector(p.x + gm.parent.random(-10, 10), p.y - 70 + gm.parent.random(-10, 10)), dir,
+						gm.parent.random(4), gm.parent.random(-0.2f, 0.2f), 0.2f, 0.3f, 20);
 			}
-			if(drinkValue<=0) {drinkValue = 0;drunk = false;}
-		}else {
+			if (drinkValue <= 0) {
+				drinkValue = 0;
+				drunk = false;
+			}
+		} else {
 			drunk = false;
 		}
 	}
-	
+
 	public void drunkBuff() {
-		if(drunk) {
+		if (drunk) {
 			this.maxSpeed = MAXSPEED_DRUNK;
 			this.flashDist = FLASHDIST_DRUNK;
-		}else {
+		} else {
 			this.maxSpeed = MAXSPEED_DEFAULT;
 			this.flashDist = FLASHDIST_DEFAULT;
 		}
 	}
-	
+
 	@Override
 	public void userUpdate() {
 		drunkCalculate();
 		drunkBuff();
+		if (preciseKnockDetect())
+			kill();
 	}
 
 	public void runRight() {
@@ -219,9 +221,11 @@ public class Character extends NewtonObject {
 
 	private PImage jumpEffectImg;
 	public boolean firstJumped = false;
+
 	public void jump() {
-		if(!gm.controlable) return;
-		if (gm.akp.keyW() && onFloor ) {
+		if (!gm.controlable)
+			return;
+		if (gm.akp.keyW() && onFloor) {
 			a.add(0, -jumpAcc);
 			jumpHoldTime = jumpHoldTimeMax;
 			onFloor = false;
@@ -232,27 +236,28 @@ public class Character extends NewtonObject {
 						5 * (i + 1));
 			}
 		}
-		if(jumpHoldTime>=0) {
-			if(gm.akp.keyW()) {
-				a.add(0, -jumpAcc/jumpHoldTimeMax);
+		if (jumpHoldTime >= 0) {
+			if (gm.akp.keyW()) {
+				a.add(0, -jumpAcc / jumpHoldTimeMax);
 				jumpHoldTime--;
-			}else {
+			} else {
 				jumpHoldTime = -1;
 			}
 		}
-		if(firstJumped && !secJumpable && !onFloor) {
-			if(!gm.akp.keyW()) {
+		if (firstJumped && !secJumpable && !onFloor) {
+			if (!gm.akp.keyW()) {
 				secJumpable = true;
 			}
 		}
-		if(secJumpable && !onFloor && !secJumped && gm.akp.keyW()) {
+		if (secJumpable && !onFloor && !secJumped && gm.akp.keyW()) {
 			a.add(0, -secJumpAcc);
+			v.set(v.x, 0);
 			secJumpable = false;
 			secJumped = true;
 		}
-		
+
 	}
-	
+
 	@Override
 	public void beginFall() {
 		secJumpable = true;
@@ -263,12 +268,8 @@ public class Character extends NewtonObject {
 	protected void fallToFloor() {
 		for (int i = 0; i < 2; i++) {
 			gm.animator.addAnimation(jumpEffectImg, p,
-					new PVector(0, -gm.parent.random(0.5f, 2)).rotate(gm.parent.random(-3.14f / 6, 3.14f / 6)),
-					0,
-					0,
-					0,
-					.5f,
-					10 * (i + 1));
+					new PVector(0, -gm.parent.random(0.5f, 2)).rotate(gm.parent.random(-3.14f / 6, 3.14f / 6)), 0, 0, 0,
+					.5f, 10 * (i + 1));
 		}
 		secJumped = false;
 		secJumpable = false;
@@ -279,12 +280,8 @@ public class Character extends NewtonObject {
 	protected void upKnocked() {
 		for (int i = 0; i < 2; i++) {
 			gm.animator.addAnimation(jumpEffectImg, PVector.add(p, new PVector(0, -this.body.getHeight())),
-					new PVector(0, gm.parent.random(0.5f, 2)).rotate(gm.parent.random(-3.14f / 6, 3.14f / 6)),
-					0,
-					0,
-					0,
-					.5f,
-					10 * (i + 1));
+					new PVector(0, gm.parent.random(0.5f, 2)).rotate(gm.parent.random(-3.14f / 6, 3.14f / 6)), 0, 0, 0,
+					.5f, 10 * (i + 1));
 		}
 	}
 
@@ -298,6 +295,7 @@ public class Character extends NewtonObject {
 	public void dieCheck() {
 		if (p.y > (gm.map.height + 5) * Map.BLOCKSIZE || p.y < -10 * Map.BLOCKSIZE)
 			kill();
+
 	}
 
 	public void standCheck() {
@@ -350,8 +348,8 @@ public class Character extends NewtonObject {
 	}
 
 	private void renderMan() {
-		g.beginDraw();
-		g.clear();
+		pg.beginDraw();
+		pg.clear();
 		if (!drunk) {
 			if (!hold) {
 				if (onFloor) {
@@ -390,16 +388,16 @@ public class Character extends NewtonObject {
 			}
 		}
 		if (!faceToRight) {
-			PImage cur = gm.res.getMirroImage(g.copy());
-			g.clear();
-			g.image(cur, 0, 0);
+			PImage cur = gm.res.getMirroImage(pg.copy());
+			pg.clear();
+			pg.image(cur, 0, 0);
 		}
-		g.endDraw();
+		pg.endDraw();
 	}
 
 	private void renderMan(int indexBody, int indexFace) {
-		g.image(bodylist[indexBody], 0, 0);
-		g.image(facelist[indexFace], 0, 0);
+		pg.image(bodylist[indexBody], 0, 0);
+		pg.image(facelist[indexFace], 0, 0);
 	}
 
 	public float getHandPositionX() {
@@ -411,7 +409,7 @@ public class Character extends NewtonObject {
 	}
 
 	public void renderRatio(float ratio, int r, int g, int b, int x, int y) {
-		float ra = Math.max(0,Math.min(ratio,1));
+		float ra = Math.max(0, Math.min(ratio, 1));
 		gm.parent.pushMatrix();
 		gm.parent.translate(x, y);
 		gm.parent.fill(r, g, b);

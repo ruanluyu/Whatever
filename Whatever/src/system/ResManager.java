@@ -30,7 +30,8 @@ public class ResManager {
 	public void loadAll() {
 		////// SOUND
 		soundList=
-		loadSpecialSound("./res/bgm/gun_00.wav," 
+		loadSpecialSound("./res/bgm/welcome.wav,"
+						+"./res/bgm/gun_00.wav," 
 						+ "./res/bgm/gun_01.wav," 
 						+ "./res/bgm/gun_02.wav,"
 						);

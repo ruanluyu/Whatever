@@ -1,0 +1,11 @@
+package system;
+
+public class Layer {
+	public String name = null;
+	private static int untitledLayerCounter = 0;
+	public GameManager gm = null;
+	public Layer(GameManager gm) {
+		this.gm = gm;
+	}
+	
+}

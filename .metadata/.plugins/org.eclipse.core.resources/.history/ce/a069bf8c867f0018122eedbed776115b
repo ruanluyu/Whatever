@@ -1,0 +1,7 @@
+package system;
+
+import processing.core.PGraphics;
+
+public interface RenderableLayerFromCamera {
+	public void renderLayer(PGraphics pg);
+}

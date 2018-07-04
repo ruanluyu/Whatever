@@ -1,0 +1,149 @@
+package system;
+
+import java.util.ArrayList;
+
+import object.Character;
+import object.NewtonObject;
+import processing.core.PApplet;
+import processing.core.PGraphics;
+import processing.core.PVector;
+
+public class GameManager {
+	public PApplet parent;
+	public ResManager res;
+	public Map map;
+	public Camera cam;
+	public AKeyPress akp;
+	public Character man;
+	public GameSystem system;
+	public Animator animator;
+	/**
+	 * 需要手动在renderFClist和updateList中注册
+	 */
+	public ArrayList<NewtonObject> nobjlist = new ArrayList<NewtonObject>();
+	// list
+	public ArrayList<Renderable> renderlist = new ArrayList<Renderable>();
+
+	public void loadRenderList() {
+		renderlist.clear();
+		// sign renderable objects up here
+
+		// end
+		GameSystem.moveNullObject(renderlist);
+	}
+
+	public ArrayList<RenderableFromCamera> renderFClist = new ArrayList<RenderableFromCamera>();
+
+	public void loadRenderFCList() {
+		renderFClist.clear();
+		// sign renderable from camera objects up here
+		renderFClist.add(map);
+		renderFClist.add(man);
+		renderFClist.add(animator);
+		// end
+		GameSystem.moveNullObject(renderFClist);
+		
+		for(RenderableFromCamera rfc : renderFClist) {
+			if(rfc instanceof RenderableLayerFromCamera) {
+				((RenderableLayerFromCamera) rfc).setLayers();
+			}
+		}
+	}
+
+	public ArrayList<NeedUpdate> updatelist = new ArrayList<NeedUpdate>();
+
+	public void loadNeedUpdateList() {
+		updatelist.clear();
+		// sign renderable from camera objects up here
+		updatelist.add(akp);
+		updatelist.add(man);
+		updatelist.add(cam);
+		updatelist.add(map);
+		updatelist.add(animator);
+		// end
+		GameSystem.moveNullObject(updatelist);
+	}
+	
+	public ArrayList<Layer> layers = new ArrayList<Layer>();
+	
+	public void loadLayers() {
+		layers.add(new Layer(this,"Main"));
+		layers.add(new Layer(this,"KillMe",false));
+		layers.add(new Layer(this,"KillMonster",false));
+	}
+	
+	public void manKilledUpdate(){
+		animator.clear();
+	}
+	
+	// global properties
+	public int level = 1;
+	public int life = 3;
+	public boolean die = false;
+	public boolean controlable = false;
+	public Mode gameMode = Mode.OP;
+
+	public enum Mode {
+		OP, LOAD, RUN, PAUSE, DIE
+	}
+
+	/**
+	 * 0-start;1-load;2-exit
+	 */
+	public int selection = 0;
+	
+	//Maths
+	public PVector localToWorld(PVector l) {
+		return new PVector(
+				localXToWorldX(l.x),
+				localYToWorldY(l.y)
+				);
+	}
+	
+	public float localXToWorldX(float lx) {
+		return PApplet.map(lx,0,GameSystem.WIDTH,cam.p.x-cam.s.x/2f,cam.p.x+cam.s.x/2f);
+	}
+	
+	public float localYToWorldY(float ly) {
+		return PApplet.map(ly,0,GameSystem.HEIGHT,cam.p.y-cam.s.y/2f,cam.p.y+cam.s.y/2f);
+	}
+	
+	public PVector worldToLocal(PVector w) {
+		return new PVector(
+				worldXToLocalX(w.x),
+				worldYToLocalY(w.y)
+				);
+	}
+	
+	public float worldXToLocalX(float wx) {
+		return PApplet.map(wx,cam.p.x-cam.area.getWidth()/2f,cam.p.x+cam.area.getWidth()/2f,0,GameSystem.WIDTH);
+	}
+	
+	public float worldYToLocalY(float wy) {
+		return PApplet.map(wy,cam.p.y-cam.s.y/2f,cam.p.y+cam.s.y/2f,0,GameSystem.HEIGHT);
+	}
+	
+	public PVector worldVecToLocalVec(PVector wv) {
+		PVector out = new PVector().set(wv);
+		worldToLocal(out).sub(worldToLocal(new PVector()));
+		return out;
+	}
+	
+	public PVector localVecToWorldVec(PVector lv) {
+		PVector out = new PVector().set(lv);
+		localToWorld(out).sub(localToWorld(new PVector()));
+		return out;
+	}
+	
+	public int findLayerId(String layerName) {
+		int id = -1;
+		for(Layer cl : layers) {
+			id++;
+			if(cl == null) continue;
+			if(cl.name.equals(layerName)) {
+				return id;
+			}
+		}
+		return -1;
+	}
+}

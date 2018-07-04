@@ -2,11 +2,14 @@ package system;
 
 import blocks.Block;
 import blocks.Block_Air;
+import blocks.Block_Thorn;
 import blocks.NeedInitialize;
 import blocks.TouchAreaFeedBack;
+import processing.awt.PGraphicsJava2D;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
-public class Map implements RenderableFromCamera, NeedUpdate {
+public class Map implements RenderableFromCamera, NeedUpdate, RenderableLayerFromCamera {
 	public Block[] blist;
 	public Block[] renderBlist;
 	public int width = 0;
@@ -121,7 +124,7 @@ public class Map implements RenderableFromCamera, NeedUpdate {
 				continue;
 			if (!(bl instanceof Block_Air)) {
 				gm.parent.pushMatrix();
-				gm.parent.translate((bl.idx+.5f) * BLOCKSIZE, (bl.idy+.5f) * BLOCKSIZE);
+				gm.parent.translate((bl.idx + .5f) * BLOCKSIZE, (bl.idy + .5f) * BLOCKSIZE);
 				if (bl.rotate90 != 0) {
 					gm.parent.rotate(bl.rotate90 * PApplet.HALF_PI);
 					// gm.parent.translate(-BLOCKSIZE / 2f, -BLOCKSIZE / 2f);
@@ -196,6 +199,42 @@ public class Map implements RenderableFromCamera, NeedUpdate {
 			if (blist[i] instanceof NeedInitialize)
 				((NeedInitialize) blist[i]).initialize();
 		}
+	}
+
+	Layer killMeLayer = null;
+	Layer killMoLayer = null;
+
+	@Override
+	public void setLayers() {
+		killMeLayer = gm.layers.get(gm.findLayerId("KillMe"));
+		killMoLayer = gm.layers.get(gm.findLayerId("KillMonster"));
+	}
+
+	@Override
+	public void renderLayer() {
+		//killMeLayer.renderStart();
+		PGraphics pge = killMeLayer.pg;
+		pge.beginDraw();
+		pge.pushMatrix();
+		pge.translate(gm.cam.s.x/2f,gm.cam.s.y/2f);
+		pge.translate(-gm.cam.p.x,-gm.cam.p.y);
+		pge.clear();
+		for (Block bl : renderBlist) {
+			if (bl == null)
+				continue;
+			if (bl instanceof Block_Thorn) {
+				pge.pushMatrix();
+				pge.translate((bl.idx + .5f) * BLOCKSIZE, (bl.idy + .5f) * BLOCKSIZE);
+				if (bl.rotate90 != 0) {
+					pge.rotate(bl.rotate90 * PApplet.HALF_PI);
+				}
+				pge.image(bl.getTexture(), -.5f * BLOCKSIZE, -.5f * BLOCKSIZE);
+				pge.popMatrix();
+			}
+		}
+		pge.popMatrix();
+		pge.endDraw();
+		//killMeLayer.renderEnd();
 	}
 
 }

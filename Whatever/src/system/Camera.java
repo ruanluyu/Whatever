@@ -6,6 +6,7 @@ public class Camera implements NeedUpdate{
 	public GameManager gm;
 	public float easing = 0.1f;
 	public PVector p = new PVector();
+	public PVector s = new PVector();
 	public PVector tp = new PVector();
 
 	/**
@@ -31,6 +32,7 @@ public class Camera implements NeedUpdate{
 		area = new Rectangle(w / 2, h / 2, mw - w, mh - h);
 		targetArea = new Rectangle(0, 0, w / 5, h / 2);
 		targetArea.setCenterPointToCenter();
+		s.set(GameSystem.WIDTH,GameSystem.HEIGHT);
 	}
 
 	public void setTarget(int tx, int ty) {

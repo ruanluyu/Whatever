@@ -26,7 +26,6 @@
 <fullyQualifiedTypeName name="system.GameSystem.Mode"/>
 <fullyQualifiedTypeName name="system.GameManager.Mode"/>
 <fullyQualifiedTypeName name="blocks.Block_Air"/>
-<fullyQualifiedTypeName name="processing.awt.PGraphicsJava2D"/>
 <fullyQualifiedTypeName name="blocks.NeedInitialize"/>
 <fullyQualifiedTypeName name="blocks.TouchAreaFeedBack"/>
 <fullyQualifiedTypeName name="system.Map"/>
@@ -35,10 +34,13 @@
 <fullyQualifiedTypeName name="system.RenderableFromCamera"/>
 <fullyQualifiedTypeName name="system.GameManager"/>
 <fullyQualifiedTypeName name="weapon.Weapon"/>
-<fullyQualifiedTypeName name="processing.core.PApplet"/>
-<fullyQualifiedTypeName name="processing.core.PGraphics"/>
 <fullyQualifiedTypeName name="processing.core.PVector"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
-<fullyQualifiedTypeName name="processing.core.PImage"/>
 <fullyQualifiedTypeName name="system.ResManager.imgBulletId"/>
+<fullyQualifiedTypeName name="processing.core.PGraphics"/>
+<fullyQualifiedTypeName name="processing.core.PApplet"/>
+<fullyQualifiedTypeName name="blocks.Block_Thorn"/>
+<fullyQualifiedTypeName name="system.Layer"/>
+<fullyQualifiedTypeName name="processing.core.PImage"/>
+<fullyQualifiedTypeName name="processing.awt.PGraphicsJava2D"/>
 </qualifiedTypeNameHistroy>

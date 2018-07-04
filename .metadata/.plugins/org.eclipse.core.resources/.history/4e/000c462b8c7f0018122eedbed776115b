@@ -1,0 +1,218 @@
+package system;
+
+import blocks.Block;
+import blocks.Block_Air;
+import blocks.NeedInitialize;
+import blocks.TouchAreaFeedBack;
+import processing.awt.PGraphicsJava2D;
+import processing.core.PApplet;
+import processing.core.PGraphics;
+
+public class Map implements RenderableFromCamera, NeedUpdate,RenderableLayerFromCamera {
+	public Block[] blist;
+	public Block[] renderBlist;
+	public int width = 0;
+	public int height = 0;
+	public int renderW = 0;
+	public int renderH = 0;
+	public static final int BLOCKSIZE = 40;
+	public Rectangle renderArea = null;
+	public GameManager gm;
+
+	public Map(GameManager gm) {
+		this.gm = gm;
+		renderArea = new Rectangle(0, 0, gm.parent.width, gm.parent.height);
+		renderArea.setCenterPointToCenter();
+		layerId = gm.findLayer("KillMe");
+	}
+
+	public Map(int w, int h, GameManager gm) {
+		this(gm);
+		initialize(w, h);
+	}
+
+	private void initialize(int idw, int idh) {
+		blist = null;
+		blist = new Block[idw * idh];
+		renderW = (gm.parent.width - gm.parent.width % Map.BLOCKSIZE + Map.BLOCKSIZE);
+		renderH = (gm.parent.height - gm.parent.height % Map.BLOCKSIZE + Map.BLOCKSIZE);
+		renderBlist = new Block[renderW * renderH];
+		width = idw;
+		height = idh;
+		for (int j = 0; j < idh; j++) {
+			for (int i = 0; i < idw; i++) {
+				blist[j * idw + i] = Block.Builder(Block.BlockId.AIR, i, j);
+			}
+		}
+		initializeRBList();
+	}
+
+	private void initializeRBList() {
+		for (int i = 0; i < renderBlist.length; i++)
+			renderBlist[i] = null;
+	}
+
+	public void set(int idx, int idy, Block.BlockId blockId) {
+		blist[idx + idy * width] = Block.Builder(blockId, idx, idy);
+	}
+
+	public void set(int idx, int idy, Block.BlockId blockId, int rotate90) {
+		Block tar = Block.Builder(blockId, idx, idy);
+		tar.rotateArea(rotate90);
+		blist[idx + idy * width] = tar;
+	}
+
+	public void set(int idx1, int idy1, int idx2, int idy2, Block.BlockId blockId) {
+		set(idx1, idy1, idx2, idy2, blockId, 0);
+	}
+
+	public void set(int idx1, int idy1, int idx2, int idy2, Block.BlockId blockId, int rotate90) {
+		if (idx1 > idx2) {
+			int c = idx1;
+			idx1 = idx2;
+			idx2 = c;
+		}
+		if (idy1 > idy2) {
+			int c = idy1;
+			idy1 = idy2;
+			idy2 = c;
+		}
+		for (int i = idx1; i <= idx2; i++) {
+			for (int j = idy1; j <= idy2; j++)
+				set(i, j, blockId, rotate90);
+		}
+	}
+
+	public int getIdFromPos(float x, float y) {
+		int id = 0;
+		if (x < 0 || x >= width * BLOCKSIZE || y < 0 || y >= height * BLOCKSIZE) {
+			return -1;
+		}
+		id = (int) Math.floor(x / BLOCKSIZE);
+		id += width * (int) Math.floor(y / BLOCKSIZE);
+		return id;
+	}
+
+	public Block getBlockFromPos(float x, float y) {
+		int id = getIdFromPos(x, y);
+		if (id == -1)
+			return null;
+		return blist[id];
+	}
+
+	public int getIdFromIdPos(int idx, int idy) {
+		if (idx < 0 || idx >= width || idy < 0 || idy >= height) {
+			return -1;
+		}
+		return idy * width + idx;
+	}
+
+	public Block getBlockFromIdPos(int idx, int idy) {
+		int id = getIdFromIdPos(idx, idy);
+		if (id == -1)
+			return null;
+		return blist[id];
+	}
+
+	public int getIdFromOneFloat(float a) {
+		return (int) (a / BLOCKSIZE);
+	}
+
+	public void renderFromCamera() {
+		for (Block bl : renderBlist) {
+			if (bl == null)
+				continue;
+			if (!(bl instanceof Block_Air)) {
+				gm.parent.pushMatrix();
+				gm.parent.translate((bl.idx+.5f) * BLOCKSIZE, (bl.idy+.5f) * BLOCKSIZE);
+				if (bl.rotate90 != 0) {
+					gm.parent.rotate(bl.rotate90 * PApplet.HALF_PI);
+					// gm.parent.translate(-BLOCKSIZE / 2f, -BLOCKSIZE / 2f);
+				}
+				gm.parent.image(bl.getTexture(), -.5f * BLOCKSIZE, -.5f * BLOCKSIZE);
+				gm.parent.popMatrix();
+			}
+			if (bl instanceof RenderableFromCamera)
+				((RenderableFromCamera) bl).renderFromCamera();
+		}
+	}
+
+	/**
+	 * 用于Rectangle范围遍历中对盒子的操作；
+	 * 
+	 * @author ZzStarSound
+	 *
+	 */
+	public interface BlockModifier {
+		public void modify(Block block, int idx, int idy);
+	}
+
+	public BlockModifier touchAreaFunc = new BlockModifier() {
+		@Override
+		public void modify(Block bl, int idx, int idy) {
+			// gm.parent.noFill();
+			// gm.parent.rect(bl.idx*BLOCKSIZE,bl.idy*BLOCKSIZE,BLOCKSIZE,BLOCKSIZE);
+			if (bl instanceof TouchAreaFeedBack)
+				((TouchAreaFeedBack) bl).touchArea(gm.man.body);
+		}
+
+	};
+
+	public BlockModifier loadRBlocksFunc = new BlockModifier() {
+		@Override
+		public void modify(Block bl, int idx, int idy) {
+			renderBlist[idx + (idy) * renderW] = bl;
+			if (bl instanceof NeedUpdate)
+				((NeedUpdate) bl).update();
+		}
+
+	};
+
+	@Override
+	public void update() {
+		initializeRBList();
+		renderArea.moveCenterTo(gm.cam.p);
+		itBlocksFromRec(renderArea, loadRBlocksFunc);
+		itBlocksFromRec(gm.man.body, touchAreaFunc);// touchAreaFeedBack
+	}
+
+	public void itBlocksFromRec(Rectangle rec, BlockModifier bm) {
+		int startIdX = getIdFromOneFloat(rec.p1x());
+		int endIdX = getIdFromOneFloat(rec.p2x());
+		int startIdY = getIdFromOneFloat(rec.p1y());
+		int endIdY = getIdFromOneFloat(rec.p2y());
+		Block bl = null;
+		gm.cam.startCam();
+		for (int j = startIdY; j <= endIdY; j++) {
+			for (int i = startIdX; i <= endIdX; i++) {
+				bl = getBlockFromIdPos(i, j);
+				if (bl == null)
+					continue;
+				bm.modify(bl, i - startIdX, j - startIdY);
+			}
+		}
+		gm.cam.endCam();
+	}
+
+	public void initBlocks() {
+		for (int i = 0; i < blist.length; i++) {
+			if (blist[i] instanceof NeedInitialize)
+				((NeedInitialize) blist[i]).initialize();
+		}
+	}
+	
+	public int layerId = -1;
+
+	@Override
+	public int getLayerId() {
+		
+		return 0;
+	}
+
+	@Override
+	public void renderLayer(Layer layer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

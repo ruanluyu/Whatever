@@ -12,9 +12,12 @@ import object.NewtonObject;
 
 public class GameSystem {
 	public GameManager gm;
-	
+
 	private static final int DIETIME = 80;
 	private static final int LOADTIME = 45;
+
+	public static final int WIDTH = 800;
+	public static final int HEIGHT = 400;
 
 	public GameSystem(PApplet p) {
 		gm = new GameManager();
@@ -30,40 +33,43 @@ public class GameSystem {
 		gm.cam = new Camera(gm);
 		gm.akp = new AKeyPress(gm);
 		gm.animator = new Animator(gm);
+		
+		// Load Layers
+		gm.loadLayers();
+
 		// Cur
 		gm.map.set(0, 9, 25, 9, Block.BlockId.BLOCK_NORMAL);
 		gm.map.set(8, 4, 25, 5, Block.BlockId.BLOCK_SUSPENDED);
 		gm.map.set(10, 8, Block.BlockId.THORN);
 		gm.map.set(13, 8, 14, 8, Block.BlockId.THORN);
 		gm.map.set(17, 8, 18, 8, Block.BlockId.THORN);
-		gm.map.set(7, 4, 7, 5, Block.BlockId.THORN, 3);
+		//gm.map.set(7, 4, 7, 5, Block.BlockId.THORN, 3);
 		gm.controlable = true;
 
 		// Load NeedUpdate objects
 		gm.loadNeedUpdateList();
 		gm.loadRenderFCList();
 		gm.loadRenderList();
+		gm.parent.println("GS Initialized.");
 	}
 
 	public void render() {
-		synchronized (this) {
-			switch (gm.gameMode) {
-			case RUN:
-				renderRUN();
-				break;
-			case PAUSE:
-				renderPAUSE();
-				break;
-			case DIE:
-				renderDIE();
-				break;
-			case LOAD:
-				renderLOAD();
-				break;
-			case OP:
-				renderOP();
-				break;
-			}
+		switch (gm.gameMode) {
+		case RUN:
+			renderRUN();
+			break;
+		case PAUSE:
+			renderPAUSE();
+			break;
+		case DIE:
+			renderDIE();
+			break;
+		case LOAD:
+			renderLOAD();
+			break;
+		case OP:
+			renderOP();
+			break;
 		}
 	}
 
@@ -96,9 +102,17 @@ public class GameSystem {
 		for (NeedUpdate nu : gm.updatelist)
 			nu.update();
 		gm.cam.startCam();
-		for (RenderableFromCamera nu : gm.renderFClist)
+		for (RenderableFromCamera nu : gm.renderFClist) {
 			nu.renderFromCamera();
+			if (nu instanceof RenderableLayerFromCamera) {
+				((RenderableLayerFromCamera) nu).renderLayer();
+			}
+		}
 		gm.cam.endCam();
+		/*for (Layer ly : gm.layers) {
+			if (ly.visiable)
+				gm.parent.image(ly.pg, 0, 0);
+		}*/
 		for (Renderable nu : gm.renderlist)
 			nu.render();
 		if (!gm.parent.focused) {
@@ -114,10 +128,9 @@ public class GameSystem {
 		screenShoot();
 		gm.gameMode = Mode.PAUSE;
 	}
-	
-	
+
 	private int dieTime = DIETIME;
-	
+
 	private void renderDIE() {
 		gm.parent.image(scShoot, 0, 0);
 		gm.parent.textAlign(PApplet.CENTER);
@@ -150,7 +163,7 @@ public class GameSystem {
 		gm.akp.init();
 		gm.parent.loop();
 	}
-	
+
 	private int loadTime = LOADTIME;
 
 	private void renderLOAD() {
@@ -180,7 +193,8 @@ public class GameSystem {
 		gm.parent.text("Load", gm.parent.width / 2f, gm.parent.height / 2f + 50);
 		gm.parent.text("Exit", gm.parent.width / 2f, gm.parent.height / 2f + 100);
 		gm.parent.ellipse(gm.parent.width / 2f - 50, gm.parent.height / 2f - 10 + 50 * gm.selection, 20, 20);
-
+		if (!gm.res.soundList[0].isPlaying())
+			gm.res.soundList[0].loop();
 		if (!solecable && opTime <= 0) {
 			opTime = 20;
 			solecable = true;
@@ -198,11 +212,15 @@ public class GameSystem {
 				switch (gm.selection) {
 				case 0:
 					startGame();
+					if (gm.res.soundList[0].isPlaying())
+						gm.res.soundList[0].pause();
 					break;
 				case 1:
 					loadGame();
 					break;
 				case 2:
+					if (gm.res.soundList[0].isPlaying())
+						gm.res.soundList[0].pause();
 					gm.parent.exit();
 				}
 			}

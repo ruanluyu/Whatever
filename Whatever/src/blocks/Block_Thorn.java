@@ -7,7 +7,8 @@ public class Block_Thorn extends Block implements TouchAreaFeedBack, NeedInitial
 
 	public Block_Thorn(int idx, int idy) {
 		super(Block.BlockId.THORN, idx, idy);
-		buildArea(.3f, .5f);
+		//buildArea(.3f, .5f);
+		buildArea(.1f, .1f);
 	}
 
 	@Override

@@ -1,0 +1,7 @@
+package system;
+
+public interface RenderableLayerFromCamera {
+	public int[] getLayerId() ;
+	public int layerNum();
+	public void renderLayer(Layer layer[]);
+}
