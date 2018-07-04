@@ -36,7 +36,7 @@ public class GameAppRun extends PApplet {
 	@Override
 	public void keyPressed() {
 		gs.gm.akp.checkKeyPressed();
-		if(key == this.ESC){
+		if(key == ESC){
 			key = '/';
 			gs.escPressed();
 		}

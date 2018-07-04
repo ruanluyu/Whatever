@@ -19,7 +19,7 @@ public class Rectangle {
 		p2.set(x + w, y + h);
 		size.set(w, h);
 		checkPoint();
-		center.set(p1);
+		center.set(p1.x/2f,p1.y/2f);
 	}
 
 	public void checkPoint() {

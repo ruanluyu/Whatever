@@ -115,7 +115,10 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 		if (!(gm.map.getBlockFromPos(lastP.x - bottomCPDis, lastP.y) instanceof Penetrable))
 			return;
 		onFloor = false;
+		beginFall();
 	}
+	
+	public void beginFall() {}
 
 	public int numOfCheckPoints = 3;
 

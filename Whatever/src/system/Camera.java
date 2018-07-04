@@ -11,7 +11,7 @@ public class Camera implements NeedUpdate{
 	/**
 	 * target active area extension X 目标自由活动范围（相对于中心点）向x轴两侧扩展的像素数
 	 */
-	private Rectangle targetArea = null;
+	public Rectangle targetArea = null;
 
 	/**
 	 * 摄像机活动范围

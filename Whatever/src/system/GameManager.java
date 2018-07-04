@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import object.Character;
 import object.NewtonObject;
 import processing.core.PApplet;
+import processing.core.PVector;
 
 public class GameManager {
 	public PApplet parent;
@@ -75,4 +76,47 @@ public class GameManager {
 	 * 0-start;1-load;2-exit
 	 */
 	public int selection = 0;
+	
+	//Maths
+	public PVector localToWorld(PVector l) {
+		return new PVector(
+				localXToWorldX(l.x),
+				localYToWorldY(l.y)
+				);
+	}
+	
+	public float localXToWorldX(float lx) {
+		return PApplet.map(lx,0,parent.width,cam.p.x-cam.area.getWidth()/2f,cam.p.x+cam.area.getWidth()/2f);
+	}
+	
+	public float localYToWorldY(float ly) {
+		return PApplet.map(ly,0,parent.height,cam.p.y-cam.area.getHeight()/2f,cam.p.y+cam.area.getHeight()/2f);
+	}
+	
+	public PVector worldToLocal(PVector w) {
+		return new PVector(
+				worldXToLocalX(w.x),
+				worldYToLocalY(w.y)
+				);
+	}
+	
+	public float worldXToLocalX(float wx) {
+		return PApplet.map(wx,cam.p.x-cam.area.getWidth()/2f,cam.p.x+cam.area.getWidth()/2f,0,parent.width);
+	}
+	
+	public float worldYToLocalY(float wy) {
+		return PApplet.map(wy,cam.p.y-cam.area.getHeight()/2f,cam.p.y+cam.area.getHeight()/2f,0,parent.height);
+	}
+	
+	public PVector worldVecToLocalVec(PVector wv) {
+		PVector out = new PVector().set(wv);
+		worldToLocal(out).sub(worldToLocal(new PVector()));
+		return out;
+	}
+	
+	public PVector localVecToWorldVec(PVector lv) {
+		PVector out = new PVector().set(lv);
+		localToWorld(out).sub(localToWorld(new PVector()));
+		return out;
+	}
 }

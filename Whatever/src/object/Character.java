@@ -17,6 +17,12 @@ import system.GameManager.Mode;
 public class Character extends NewtonObject {
 	public float acc = .2f;
 	public float jumpAcc = 5;
+	public float jumpHoldAcc = 4;
+	public float secJumpAcc = 7;
+	public int jumpHoldTimeMax = 25;
+	public int jumpHoldTime = jumpHoldTimeMax;
+	public boolean secJumped = false;
+	public boolean secJumpable = false;
 	public float maxSpeed = 5;
 	public static final float MAXSPEED_DEFAULT = 5;
 	public static final float MAXSPEED_DRUNK = 2.7f;
@@ -212,17 +218,45 @@ public class Character extends NewtonObject {
 	}
 
 	private PImage jumpEffectImg;
-
+	public boolean firstJumped = false;
 	public void jump() {
-		if (gm.akp.keyW() && onFloor && gm.controlable) {
+		if(!gm.controlable) return;
+		if (gm.akp.keyW() && onFloor ) {
 			a.add(0, -jumpAcc);
+			jumpHoldTime = jumpHoldTimeMax;
 			onFloor = false;
+			firstJumped = true;
 			for (int i = 0; i < 2; i++) {
 				gm.animator.addAnimation(jumpEffectImg, p,
 						new PVector(0, -gm.parent.random(0.5f, 2)).rotate(gm.parent.random(-3.14f / 6, 3.14f / 6)),
 						5 * (i + 1));
 			}
 		}
+		if(jumpHoldTime>=0) {
+			if(gm.akp.keyW()) {
+				a.add(0, -jumpAcc/jumpHoldTimeMax);
+				jumpHoldTime--;
+			}else {
+				jumpHoldTime = -1;
+			}
+		}
+		if(firstJumped && !secJumpable && !onFloor) {
+			if(!gm.akp.keyW()) {
+				secJumpable = true;
+			}
+		}
+		if(secJumpable && !onFloor && !secJumped && gm.akp.keyW()) {
+			a.add(0, -secJumpAcc);
+			secJumpable = false;
+			secJumped = true;
+		}
+		
+	}
+	
+	@Override
+	public void beginFall() {
+		secJumpable = true;
+		secJumped = false;
 	}
 
 	@Override
@@ -236,6 +270,9 @@ public class Character extends NewtonObject {
 					.5f,
 					10 * (i + 1));
 		}
+		secJumped = false;
+		secJumpable = false;
+		firstJumped = false;
 	}
 
 	@Override
