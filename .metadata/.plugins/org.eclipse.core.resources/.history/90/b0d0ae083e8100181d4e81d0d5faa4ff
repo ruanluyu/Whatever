@@ -1,0 +1,436 @@
+package object;
+
+import blocks.Block;
+import blocks.StandFeedBack;
+import blocks.TouchFeedBack;
+import blocks.WalkFeedBack;
+import processing.awt.PGraphicsJava2D;
+import processing.core.PApplet;
+import processing.core.PGraphics;
+import processing.core.PImage;
+import processing.core.PVector;
+import system.Map;
+//import system.Rectangle;
+//import system.ResManager;
+import system.GameManager.Mode;
+
+public class Character extends NewtonObject {
+	public float acc = .2f;
+	public float jumpAcc = 4;
+	public float jumpHoldAcc = 4;
+	public float secJumpAcc = 6;
+	public int jumpHoldTimeMax = 25;
+	public int jumpHoldTime = jumpHoldTimeMax;
+	public boolean secJumped = false;
+	public boolean secJumpable = false;
+	public float maxSpeed = 5;
+	public static final float MAXSPEED_DEFAULT = 5;
+	public static final float MAXSPEED_DRUNK = 2.7f;
+	public boolean faceToRight = true;
+	public boolean drunk = false;
+	public boolean hold = false;
+	public PImage copyG = null;
+	public PImage[] facelist;
+	public PImage[] bodylist;
+	public PImage[] drunkEffect;
+	public PImage[] flashEffect;
+
+	public Character(int x, int y) {
+		super(30, 75);
+		setP(x, y);
+		pg = new PGraphicsJava2D();
+		pg.setSize(40, 80);
+		loadBodyList();
+		loadFaceList();
+		loadEffectImg();
+		loadDrunkEffectImg();
+		loadFlashEffectImg();
+		bottomCPDis = 5;
+		killLayer = gm.layers.get(gm.findLayerId("KillMe"));
+	}
+
+	public void loadFaceList() {
+		facelist = gm.res.faceImgList;
+	}
+
+	public void loadBodyList() {
+		bodylist = gm.res.bodyImgList;
+
+	}
+
+	public void loadEffectImg() {
+		jumpEffectImg = gm.res.bulletImgList[0];
+		flashEffectImg = gm.res.bulletImgList[1];
+	}
+
+	public void loadDrunkEffectImg() {
+		int num = 2;
+		drunkEffect = new PImage[num];
+		for (int i = 0; i < num; i++) {
+			drunkEffect[i] = gm.res.effectImgList[i];
+		}
+	}
+
+	public void loadFlashEffectImg() {
+		int num = 2;
+		flashEffect = new PImage[num];
+		for (int i = 0; i < num; i++) {
+			flashEffect[i] = gm.res.effectImgList[i + 2];
+		}
+	}
+
+	private float walkDist = 0;
+	private int walkTimer = 0;
+
+	private void walkTime() {
+		walkDist += PApplet.abs(v.x);
+		walkTimer = (int) ((walkDist / 20) % 3);
+		if (walkDist > 10000 || !onFloor)
+			walkDist = 0;
+	}
+
+	@Override()
+	public void renderFromCamera() {
+		renderMan();
+		/*
+		 * if (flashCoolTime > 0 && copyG != null) { gm.parent.blendMode(2 << (int)
+		 * gm.parent.random(2, 5)); gm.parent.image(copyG, ox - g.width / 2f, oy -
+		 * g.height); gm.parent.blendMode(PApplet.NORMAL); }
+		 */
+		gm.parent.pushMatrix();
+		gm.parent.translate(p.x, p.y);
+		if (flashCoolTime > 0)
+			renderRatio(1 - flashCoolTime / (float) flashCoolTimeLength, 255, 0, 0, 0, -90);
+		if (drinkValue > 0)
+			renderRatio(drinkValue / drinkMaxValue, 200, 0, 173, 0, -100);
+		gm.parent.image(pg, -pg.width / 2f, -pg.height);
+		gm.parent.noFill();
+		// gm.parent.rect(-body.getWidth() / 2f, -body.getHeight(),
+		// body.getWidth(), body.getHeight());
+		gm.parent.popMatrix();
+	}
+
+	private float flashDist = 80;
+	public static final float FLASHDIST_DEFAULT = 80;
+	public static final float FLASHDIST_DRUNK = 170;
+	private final int flashCoolTimeLength = 60;
+	private int flashCoolTime = 60;
+	private float ox = -1;
+	private float oy = -1;
+
+	private PImage flashEffectImg;
+	
+	public float forwardMaxDist(float max) {
+		return maxDist(faceToRight,max);
+	}
+
+	public void flash() {
+		if (flashCoolTime <= 0) {
+			if (gm.akp.keyBlank() && gm.controlable) {
+				ox = p.x;
+				oy = p.y;
+				float dist = forwardMaxDist(flashDist);
+				p.x += (faceToRight ? 1 : -1) * dist;
+				a.x += (faceToRight ? 1 : -1) * 3 * dist/flashDist;
+				/*if (faceToRight)
+					airRightCheck();
+				else
+					airLeftCheck();*/
+				this.fallCheck();
+				v.x = 0;
+				flashEffect();
+				flashCoolTime = flashCoolTimeLength;
+				copyG = pg.copy();
+				gm.animator.addAnimation(copyG, new PVector(ox, oy - pg.height / 2f),
+						new PVector((p.x - ox) * 0.001f, (p.y - oy) * 0.001f), 0, 0, 0f, 1f, flashCoolTimeLength / 3);
+			}
+		} else
+			flashCoolTime--;
+	}
+
+	public void flashEffect() {
+		int distDelta = 10;
+		PVector Pchan = PVector.sub(p, lastP);
+		int dist = (int) Pchan.mag();
+		PVector dir = Pchan.normalize().mult(distDelta).copy();
+		for (int i = 0; i < dist / distDelta; i++) {
+			PImage renderImg = null;
+			if (drunk)
+				renderImg = drunkEffect[gm.parent.floor(gm.parent.random(drunkEffect.length - 0.001f))];
+			else
+				renderImg = flashEffect[gm.parent.floor(gm.parent.random(flashEffect.length - 0.001f))];
+			gm.animator.addAnimation(renderImg,
+					PVector.add(lastP, PVector.mult(Pchan, i)).add(0,
+							-this.body.getHeight() / 2f + gm.parent.random(-20, 20)),
+					PVector.mult(dir, .1f * gm.parent.random(1)).rotate(gm.parent.random(3.14f / 6) - 3.14f / 12),
+					gm.parent.random(4), gm.parent.random(-.1f, .1f), 0, 1f, 10 * i);
+		}
+	}
+
+	public float drinkValue = 250;
+	public float drinkMaxValue = 1000;
+
+	public void drunkCalculate() {
+		if (drinkValue > 0) {
+			if (drinkValue > drinkMaxValue)
+				drinkValue = drinkMaxValue;
+			drunk = true;
+			drinkValue--;
+			int num = (gm.parent.random(1) < (drinkValue / drinkMaxValue) * .8f + .01f) ? (1) : (0);
+			PVector dir = new PVector(0, -0.7f);
+			for (int i = 0; i < num; i++) {
+				gm.animator.addAnimation(drunkEffect[gm.parent.floor(gm.parent.random(drunkEffect.length - 0.001f))],
+						new PVector(p.x + gm.parent.random(-10, 10), p.y - 70 + gm.parent.random(-10, 10)), dir,
+						gm.parent.random(4), gm.parent.random(-0.2f, 0.2f), 0.2f, 0.3f, 20);
+			}
+			if (drinkValue <= 0) {
+				drinkValue = 0;
+				drunk = false;
+			}
+		} else {
+			drunk = false;
+		}
+	}
+
+	public void drunkBuff() {
+		if (drunk) {
+			this.maxSpeed = MAXSPEED_DRUNK;
+			this.flashDist = FLASHDIST_DRUNK;
+		} else {
+			this.maxSpeed = MAXSPEED_DEFAULT;
+			this.flashDist = FLASHDIST_DEFAULT;
+		}
+	}
+
+	@Override
+	public void userUpdate() {
+		drunkCalculate();
+		drunkBuff();
+		if (preciseKnockDetect())
+			kill();
+	}
+
+	public void runRight() {
+		if (gm.akp.keyD() && gm.controlable) {
+			a.add(acc, 0);
+			faceToRight = true;
+		}
+	}
+
+	public void runLeft() {
+		if (gm.akp.keyA() && gm.controlable) {
+			a.add(-acc, 0);
+			faceToRight = false;
+		}
+	}
+
+	private PImage jumpEffectImg;
+	public boolean firstJumped = false;
+
+	public void jump() {
+		if (!gm.controlable)
+			return;
+		if (gm.akp.keyW() && onFloor) {
+			a.add(0, -jumpAcc);
+			jumpHoldTime = jumpHoldTimeMax;
+			onFloor = false;
+			firstJumped = true;
+			for (int i = 0; i < 5; i++) {
+				gm.animator.addAnimation(flashEffect[1], p,
+						new PVector(0, -gm.parent.random(0.5f, 2)).rotate(gm.parent.random(-3.14f , 3.14f )*.5f),
+						5 * (i + 1));
+			}
+		}
+		if (jumpHoldTime >= 0) {
+			if (gm.akp.keyW()) {
+				a.add(0, -jumpAcc / jumpHoldTimeMax);
+				jumpHoldTime--;
+			} else {
+				jumpHoldTime = -1;
+			}
+		}
+		if (firstJumped && !secJumpable && !onFloor) {
+			if (!gm.akp.keyW()) {
+				secJumpable = true;
+			}
+		}
+		if (secJumpable && !onFloor && !secJumped && gm.akp.keyW()) {
+			gm.animator.addAnimation(flashEffect[0],
+					p,
+					new PVector(0,.5f),
+					gm.parent.random(4), 
+					gm.parent.random(-.5f, .5f), 
+					0, 
+					1f, 
+					25 );
+			a.add(0, -secJumpAcc);
+			v.set(v.x, 0);
+			secJumpable = false;
+			secJumped = true;
+		}
+
+	}
+
+	@Override
+	public void beginFall() {
+		secJumpable = true;
+		secJumped = false;
+	}
+
+	@Override
+	protected void fallToFloor() {
+		for (int i = 0; i < gm.parent.min((p.y-lastP.y)*2,10); i++) {
+			gm.animator.addAnimation(flashEffect[gm.parent.floor(gm.parent.random(0.7f,flashEffect.length-0.01f))], p,
+					new PVector(0, -gm.parent.random(0.5f, 3f)).rotate(gm.parent.random(-3.14f / 6, 3.14f / 6)), 0, 0, 0,
+					.5f, 3 * (i + 1));
+		}
+		secJumped = false;
+		secJumpable = false;
+		firstJumped = false;
+	}
+
+	@Override
+	protected void upKnocked() {
+		for (int i = 0; i < 2; i++) {
+			gm.animator.addAnimation(jumpEffectImg, PVector.add(p, new PVector(0, -this.body.getHeight())),
+					new PVector(0, gm.parent.random(0.5f, 2)).rotate(gm.parent.random(-3.14f / 6, 3.14f / 6)), 0, 0, 0,
+					.5f, 10 * (i + 1));
+		}
+	}
+
+	public void speedLimit() {
+		if (PApplet.abs(v.x) > maxSpeed) {
+			v.x = v.x > 0 ? 1 : -1;
+			v.x *= maxSpeed;
+		}
+	}
+
+	public void dieCheck() {
+		if (p.y > (gm.map.height + 5) * Map.BLOCKSIZE || p.y < -10 * Map.BLOCKSIZE)
+			kill();
+
+	}
+
+	public void standCheck() {
+		if (onFloor && v.x == 0f) {
+			Block block = gm.map.getBlockFromPos(p.x, p.y + .5f);
+			if (block instanceof StandFeedBack)
+				((StandFeedBack) block).stand();
+			if (block instanceof TouchFeedBack)
+				((TouchFeedBack) block).touch();
+		}
+	}
+
+	public void walkCheck() {
+		if (onFloor && v.x != 0f) {
+			Block block = gm.map.getBlockFromPos(p.x, p.y + .5f);
+			if (block instanceof WalkFeedBack)
+				((WalkFeedBack) block).walk();
+			if (block instanceof TouchFeedBack)
+				((TouchFeedBack) block).touch();
+		}
+	}
+
+	/**
+	 * É±µôÐ¡ÈË²¢ÇÒ-1s~~ ~_~
+	 */
+	public void kill() {
+		if (gm.die)
+			return;
+		v.set(0, 0);
+		gm.life--;
+		gm.die = true;
+		gm.controlable = false;
+		gm.gameMode = Mode.DIE;
+	}
+
+	@Override
+	public void otherControl() {
+		// force
+		runRight();
+		runLeft();
+		jump();
+		flash();
+		// speed
+		speedLimit();
+		// checker
+		standCheck();
+		walkCheck();
+		dieCheck();
+		walkTime();
+	}
+
+	private void renderMan() {
+		pg.beginDraw();
+		pg.clear();
+		if (!drunk) {
+			if (!hold) {
+				if (onFloor) {
+					if (v.x == 0)
+						renderMan(0, 0);
+					else
+						renderMan(walkTimer, walkTimer);
+				} else
+					renderMan(1, 1);
+			} else {
+				if (onFloor) {
+					if (v.x == 0)
+						renderMan(3, 0);
+					else
+						renderMan(walkTimer + 3, walkTimer);
+				} else
+					renderMan(4, 1);
+			}
+		} else {
+			if (!hold) {
+				if (onFloor) {
+					if (v.x == 0)
+						renderMan(0, 3);
+					else
+						renderMan(walkTimer, walkTimer + 3);
+				} else
+					renderMan(1, 4);
+			} else {
+				if (onFloor) {
+					if (v.x == 0)
+						renderMan(3, 3);
+					else
+						renderMan(walkTimer + 3, walkTimer + 3);
+				} else
+					renderMan(4, 4);
+			}
+		}
+		if (!faceToRight) {
+			PImage cur = gm.res.getMirroImage(pg.copy());
+			pg.clear();
+			pg.image(cur, 0, 0);
+		}
+		pg.endDraw();
+	}
+
+	private void renderMan(int indexBody, int indexFace) {
+		pg.image(bodylist[indexBody], 0, 0);
+		pg.image(facelist[indexFace], 0, 0);
+	}
+
+	public float getHandPositionX() {
+		return p.x + 15;
+	}
+
+	public float getHandPositionY() {
+		return p.y - 50;
+	}
+
+	public void renderRatio(float ratio, int r, int g, int b, int x, int y) {
+		float ra = Math.max(0, Math.min(ratio, 1));
+		gm.parent.pushMatrix();
+		gm.parent.translate(x, y);
+		gm.parent.fill(r, g, b);
+		gm.parent.noStroke();
+		gm.parent.rect(-25, -2, 50 * ra, 4);
+		gm.parent.noFill();
+		gm.parent.stroke(r, g, b);
+		gm.parent.rect(-25, -2, 50, 4);
+		gm.parent.popMatrix();
+	}
+}

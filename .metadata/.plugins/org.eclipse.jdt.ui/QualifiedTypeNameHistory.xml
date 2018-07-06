@@ -28,7 +28,6 @@
 <fullyQualifiedTypeName name="blocks.Block_Air"/>
 <fullyQualifiedTypeName name="blocks.NeedInitialize"/>
 <fullyQualifiedTypeName name="blocks.TouchAreaFeedBack"/>
-<fullyQualifiedTypeName name="system.Map"/>
 <fullyQualifiedTypeName name="system.Rectangle"/>
 <fullyQualifiedTypeName name="system.NeedUpdate"/>
 <fullyQualifiedTypeName name="system.RenderableFromCamera"/>
@@ -37,10 +36,12 @@
 <fullyQualifiedTypeName name="processing.core.PVector"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="system.ResManager.imgBulletId"/>
-<fullyQualifiedTypeName name="processing.core.PGraphics"/>
 <fullyQualifiedTypeName name="processing.core.PApplet"/>
 <fullyQualifiedTypeName name="blocks.Block_Thorn"/>
 <fullyQualifiedTypeName name="system.Layer"/>
 <fullyQualifiedTypeName name="processing.core.PImage"/>
+<fullyQualifiedTypeName name="system.Map"/>
+<fullyQualifiedTypeName name="processing.core.PGraphics"/>
 <fullyQualifiedTypeName name="processing.awt.PGraphicsJava2D"/>
+<fullyQualifiedTypeName name="system.Animator"/>
 </qualifiedTypeNameHistroy>

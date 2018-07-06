@@ -2,13 +2,17 @@ package system;
 
 import java.util.ArrayList;
 
+import processing.awt.PGraphicsJava2D;
+import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
 
 public class Animator implements NeedUpdate, RenderableFromCamera {
 	public GameManager gm;
 	protected ArrayList<Element> elist = new ArrayList<Element>();
-
+	public static PGraphics defaultImg = null;
+	public static PGraphics defaultImg2 = null;
+	
 	public class Element implements NeedUpdate, RenderableFromCamera {
 		public PImage img = null;
 		public float rot = 0;// Radiant
@@ -87,6 +91,22 @@ public class Animator implements NeedUpdate, RenderableFromCamera {
 
 	public Animator(GameManager gm) {
 		this.gm = gm;
+		if(defaultImg == null) {
+			defaultImg = new PGraphicsJava2D();
+			defaultImg.setSize(20, 20);
+			defaultImg.beginDraw();
+			defaultImg.fill(255,0,0);
+			defaultImg.ellipse(10, 10, 10, 10);
+			defaultImg.endDraw();
+		}
+		if(defaultImg2 == null) {
+			defaultImg2 = new PGraphicsJava2D();
+			defaultImg2.setSize(20, 20);
+			defaultImg2.beginDraw();
+			defaultImg2.fill(0,255,0);
+			defaultImg2.ellipse(10, 10, 10, 10);
+			defaultImg2.endDraw();
+		}
 	}
 
 	public void addAnimation(PImage img, PVector p, PVector v, int life) {

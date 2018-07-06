@@ -9,6 +9,7 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
+import system.Animator;
 import system.GameManager;
 import system.Layer;
 import system.Map;
@@ -65,7 +66,7 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 			}
 		}
 	}
-	
+
 	public void airLeftCheck() {
 		if (v.x >= 0)
 			return;
@@ -82,6 +83,32 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 		}
 	}
 	
+	
+
+	public float maxDist(boolean rightDir, float max) {
+		float out = max;
+		float h = body.getHeight();
+		float w = body.getWidth();
+		int nump = (int) PApplet.max(h / Map.BLOCKSIZE * 2.1f, numOfCheckPoints);
+		int numdst = PApplet.ceil(PApplet.max(max / Map.BLOCKSIZE*2.1f, numOfCheckPoints));
+		float avh = h / nump;
+		float avd = max / numdst;
+		PVector dp = new PVector();
+		for (int i = (onFloor ? 1 : 0); i <= (onFloor ? nump - 1 : nump); i++) {
+			dp.set(p.x + (rightDir ? 1 : -1) * w / 2, p.y - i * avh);
+			for (int j = 0; j <= numdst; j++) {
+				Block block = gm.map.getBlockFromPos(dp.x, dp.y);
+				if (block != null && !(block instanceof Penetrable)) {
+					return PApplet.min(
+							PApplet.abs((PApplet.floor(dp.x / Map.BLOCKSIZE) + (rightDir ? 0 : 1)) * Map.BLOCKSIZE-p.x)-(rightDir ? 1 : -1)*w/2.2f
+							,out);
+				}
+				dp.add((rightDir ? 1 : -1) * avd, 0);
+			}
+		}
+		return out;
+	}
+
 	public void rightCheck() {
 		if (v.x <= 0)
 			return;
@@ -156,7 +183,7 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 		beginFall();
 	}
 
-	public void beginFall() {
+	public void beginFall() {// Override
 	}
 
 	public int numOfCheckPoints = 3;
@@ -354,19 +381,16 @@ public abstract class NewtonObject implements RenderableFromCamera, NeedUpdate {
 		if (killLayer == null || pg == null)
 			return false;
 		killLayer.pg.beginDraw();
-		PImage curimg = killLayer.pg.get(
-				(int) gm.worldXToLocalX(p.x - body.getWidth() / 2f)-4,
-				(int) gm.worldYToLocalY(p.y - body.getHeight()), 
-				(int) body.getWidth(), 
-				(int) body.getHeight());
+		PImage curimg = killLayer.pg.get((int) gm.worldXToLocalX(p.x - body.getWidth() / 2f) - 4,
+				(int) gm.worldYToLocalY(p.y - body.getHeight()), (int) body.getWidth(), (int) body.getHeight());
 		killLayer.pg.endDraw();
 		pg.beginDraw();
-		int rx = (int)gm.parent.random(4);
-		int ry = (int)gm.parent.random(8);
-		for (int i = rx; i < curimg.width; i+=4) {
+		int rx = (int) gm.parent.random(4);
+		int ry = (int) gm.parent.random(8);
+		for (int i = rx; i < curimg.width; i += 4) {
 			if (i >= pg.width)
 				break;
-			for (int j = ry; j < curimg.height; j+=8) {
+			for (int j = ry; j < curimg.height; j += 8) {
 				if (j >= pg.height)
 					break;
 				if (gm.parent.alpha(curimg.get(i, j)) / 255f * gm.parent.alpha(pg.get(i, j)) / 255f > .9f) {

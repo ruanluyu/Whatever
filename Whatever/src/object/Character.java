@@ -119,18 +119,23 @@ public class Character extends NewtonObject {
 	private float oy = -1;
 
 	private PImage flashEffectImg;
+	
+	public float forwardMaxDist(float max) {
+		return maxDist(faceToRight,max);
+	}
 
 	public void flash() {
 		if (flashCoolTime <= 0) {
 			if (gm.akp.keyBlank() && gm.controlable) {
 				ox = p.x;
 				oy = p.y;
-				p.x += (faceToRight ? 1 : -1) * flashDist;
-				a.x += (faceToRight ? 1 : -1) * 3;
-				if (faceToRight)
+				float dist = forwardMaxDist(flashDist);
+				p.x += (faceToRight ? 1 : -1) * dist;
+				a.x += (faceToRight ? 1 : -1) * 3 * dist/flashDist;
+				/*if (faceToRight)
 					airRightCheck();
 				else
-					airLeftCheck();
+					airLeftCheck();*/
 				this.fallCheck();
 				v.x = 0;
 				flashEffect();
@@ -230,9 +235,9 @@ public class Character extends NewtonObject {
 			jumpHoldTime = jumpHoldTimeMax;
 			onFloor = false;
 			firstJumped = true;
-			for (int i = 0; i < 2; i++) {
-				gm.animator.addAnimation(jumpEffectImg, p,
-						new PVector(0, -gm.parent.random(0.5f, 2)).rotate(gm.parent.random(-3.14f / 6, 3.14f / 6)),
+			for (int i = 0; i < 5; i++) {
+				gm.animator.addAnimation(flashEffect[1], p,
+						new PVector(0, -gm.parent.random(0.5f, 2)).rotate(gm.parent.random(-3.14f , 3.14f )*.5f),
 						5 * (i + 1));
 			}
 		}
@@ -250,6 +255,14 @@ public class Character extends NewtonObject {
 			}
 		}
 		if (secJumpable && !onFloor && !secJumped && gm.akp.keyW()) {
+			gm.animator.addAnimation(flashEffect[0],
+					p,
+					new PVector(0,.5f),
+					gm.parent.random(4), 
+					gm.parent.random(-.5f, .5f), 
+					0, 
+					1f, 
+					25 );
 			a.add(0, -secJumpAcc);
 			v.set(v.x, 0);
 			secJumpable = false;
@@ -266,10 +279,10 @@ public class Character extends NewtonObject {
 
 	@Override
 	protected void fallToFloor() {
-		for (int i = 0; i < 2; i++) {
-			gm.animator.addAnimation(jumpEffectImg, p,
-					new PVector(0, -gm.parent.random(0.5f, 2)).rotate(gm.parent.random(-3.14f / 6, 3.14f / 6)), 0, 0, 0,
-					.5f, 10 * (i + 1));
+		for (int i = 0; i < gm.parent.min(PApplet.abs(p.y-lastP.y)*2,10); i++) {
+			gm.animator.addAnimation(flashEffect[gm.parent.floor(gm.parent.random(0.7f,flashEffect.length-0.01f))], p,
+					new PVector(0, -gm.parent.random(1.5f, 3f)).rotate(gm.parent.random(-3.14f / 6, 3.14f / 6)), 0, 0, 0,
+					.5f, 3 * (i + 1));
 		}
 		secJumped = false;
 		secJumpable = false;
@@ -278,10 +291,15 @@ public class Character extends NewtonObject {
 
 	@Override
 	protected void upKnocked() {
-		for (int i = 0; i < 2; i++) {
-			gm.animator.addAnimation(jumpEffectImg, PVector.add(p, new PVector(0, -this.body.getHeight())),
-					new PVector(0, gm.parent.random(0.5f, 2)).rotate(gm.parent.random(-3.14f / 6, 3.14f / 6)), 0, 0, 0,
-					.5f, 10 * (i + 1));
+		for (int i = 0; i < gm.parent.min(PApplet.abs(lastP.y-p.y)*1,4); i++) {
+			gm.animator.addAnimation(flashEffect[gm.parent.floor(gm.parent.random(flashEffect.length-0.8f))]
+					, PVector.add(p, new PVector(0, -this.body.getHeight())),
+					new PVector(0, gm.parent.random(0.5f, 2)).rotate(gm.parent.random(-3.14f , 3.14f )), 
+					0, 
+					0.1f, 
+					0,
+					.5f, 
+					10 * (i + 1));
 		}
 	}
 
